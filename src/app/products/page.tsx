@@ -1,528 +1,416 @@
 'use client';
 
-import React, { useState, useMemo, Suspense } from 'react';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  Search,
+  SlidersHorizontal,
+  X,
+  Zap,
+  Snowflake,
+  Refrigerator,
+  WashingMachine,
+  Tv,
+  CookingPot,
+  Droplets,
+  LayoutGrid,
+  RotateCcw,
+} from 'lucide-react';
 import SiteNavbar from '@/components/SiteNavbar';
 import SiteFooter from '@/components/SiteFooter';
 import TrustRibbon from '@/components/TrustRibbon';
+import PageHeader from '@/components/PageHeader';
+import ProductCard from '@/components/ProductCard';
 import { useStore } from '@/context/StoreContext';
 import { ALL_PRODUCTS, CATEGORIES, BRANDS } from '@/data/products';
-import { Product } from '@/types';
+import { whatsappLink } from '@/lib/site';
 
-function ProductsCatalogContent() {
-  const searchParams = useSearchParams();
-  const initialCategory = searchParams.get('category') || 'all';
-  const initialQuery = searchParams.get('query') || '';
+const CAT_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
+  'air-conditioners': Snowflake,
+  refrigerators: Refrigerator,
+  'washing-machines': WashingMachine,
+  televisions: Tv,
+  kitchen: CookingPot,
+  'small-appliances': Droplets,
+};
 
-  const { addToCart, wishlist, toggleWishlist, formatLKR, showToast } = useStore();
+const MAX_PRICE = 600000;
+const SORTS = [
+  { v: 'featured', l: 'Featured' },
+  { v: 'price-asc', l: 'Price: low to high' },
+  { v: 'price-desc', l: 'Price: high to low' },
+  { v: 'rating', l: 'Top rated' },
+  { v: 'discount', l: 'Biggest discount' },
+];
 
-  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
-  const [selectedBrand, setSelectedBrand] = useState<string>('All');
-  const [inverterOnly, setInverterOnly] = useState<boolean>(false);
-  const [maxPrice, setMaxPrice] = useState<number>(600000);
-  const [searchQuery, setSearchQuery] = useState<string>(initialQuery);
-  const [sortBy, setSortBy] = useState<string>('featured');
-  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
-
-  // Filter products
-  const filteredProducts = useMemo(() => {
-    return ALL_PRODUCTS.filter((p) => {
-      if (selectedCategory !== 'all' && p.category !== selectedCategory) {
-        return false;
-      }
-      if (selectedBrand !== 'All' && p.brand !== selectedBrand) {
-        return false;
-      }
-      if (inverterOnly && !p.inverter) {
-        return false;
-      }
-      if (p.price > maxPrice) {
-        return false;
-      }
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matches =
-          p.name.toLowerCase().includes(q) ||
-          (p.brand ? p.brand.toLowerCase().includes(q) : false) ||
-          p.category.toLowerCase().includes(q);
-        if (!matches) return false;
-      }
-      return true;
-    });
-  }, [selectedCategory, selectedBrand, inverterOnly, maxPrice, searchQuery]);
-
-  // Sort products
-  const sortedProducts = useMemo(() => {
-    const list = [...filteredProducts];
-    if (sortBy === 'price-asc') {
-      list.sort((a, b) => a.price - b.price);
-    } else if (sortBy === 'price-desc') {
-      list.sort((a, b) => b.price - a.price);
-    } else if (sortBy === 'rating') {
-      list.sort((a, b) => b.rating - a.rating);
-    } else if (sortBy === 'discount') {
-      list.sort((a, b) => (b.discount || 0) - (a.discount || 0));
-    }
-    return list;
-  }, [filteredProducts, sortBy]);
-
-  const resetFilters = () => {
-    setSelectedCategory('all');
-    setSelectedBrand('All');
-    setInverterOnly(false);
-    setMaxPrice(600000);
-    setSearchQuery('');
-  };
-
+function Filters({
+  brand,
+  setBrand,
+  inverterOnly,
+  setInverterOnly,
+  maxPrice,
+  setMaxPrice,
+  reset,
+}: {
+  brand: string;
+  setBrand: (b: string) => void;
+  inverterOnly: boolean;
+  setInverterOnly: (v: boolean) => void;
+  maxPrice: number;
+  setMaxPrice: (n: number) => void;
+  reset: () => void;
+}) {
+  const { formatLKR } = useStore();
   return (
-    <div className="antigravity-layout">
-      {/* Global Navigation */}
-      <SiteNavbar />
+    <div className="space-y-7">
+      <div className="flex items-center justify-between">
+        <h2 className="font-display text-lg font-bold">Filters</h2>
+        <button onClick={reset} className="inline-flex items-center gap-1.5 text-sm font-semibold text-electric hover:underline">
+          <RotateCcw className="h-3.5 w-3.5" /> Reset
+        </button>
+      </div>
 
-      {/* Breadcrumbs */}
-      <div className="breadcrumbs-bar">
-        <div className="container">
-          <ul className="breadcrumbs-list">
-            <li>
-              <Link href="/">Home</Link>
-            </li>
-            <li className="breadcrumbs-separator">/</li>
-            <li>
-              <Link href="/products">All Appliances</Link>
-            </li>
-            {selectedCategory !== 'all' && (
-              <>
-                <li className="breadcrumbs-separator">/</li>
-                <li className="breadcrumbs-current">
-                  {CATEGORIES.find((c) => c.id === selectedCategory)?.name || selectedCategory}
-                </li>
-              </>
-            )}
-          </ul>
+      <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl bg-white p-4 ring-1 ring-slate-200">
+        <span className="flex items-center gap-3">
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-electric-50 text-electric">
+            <Zap className="h-4 w-4" />
+          </span>
+          <span>
+            <span className="block text-sm font-bold text-ink">Inverter only</span>
+            <span className="block text-xs text-slate-500">Lower electricity use</span>
+          </span>
+        </span>
+        <input
+          type="checkbox"
+          checked={inverterOnly}
+          onChange={(e) => setInverterOnly(e.target.checked)}
+          className="peer sr-only"
+        />
+        <span
+          aria-hidden
+          className="relative h-6 w-11 shrink-0 rounded-full bg-slate-200 transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:bg-electric peer-checked:after:translate-x-5 peer-focus-visible:ring-2 peer-focus-visible:ring-electric peer-focus-visible:ring-offset-2"
+        />
+      </label>
+
+      <div>
+        <h3 className="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Brand</h3>
+        <div className="flex flex-wrap gap-2">
+          {BRANDS.map((b) => {
+            const val = b === 'All Brands' ? 'All' : b;
+            const active = brand === val;
+            return (
+              <button
+                key={b}
+                onClick={() => setBrand(val)}
+                aria-pressed={active}
+                className={`rounded-full px-3.5 py-2 text-sm font-semibold transition-colors ${
+                  active ? 'bg-ink text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:ring-ink'
+                }`}
+              >
+                {b}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Main Catalog Layout */}
-      <main className="catalog-page">
-        <div className="container">
-          <div className="catalog-layout">
-            {/* Sidebar Filters */}
-            <aside className="filter-sidebar">
-              <div className="filter-header">
-                <h3>Filter Appliances</h3>
-                <button onClick={resetFilters} className="filter-reset-btn">
-                  Reset All
-                </button>
-              </div>
-
-              {/* Inverter Only Switch */}
-              <div className="filter-group">
-                <label
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    cursor: 'pointer',
-                    fontSize: '0.875rem',
-                    fontWeight: 700,
-                    color: 'var(--color-dark)',
-                  }}
-                >
-                  <span>âš¡ Inverter Only</span>
-                  <input
-                    type="checkbox"
-                    checked={inverterOnly}
-                    onChange={(e) => setInverterOnly(e.target.checked)}
-                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-                  />
-                </label>
-              </div>
-
-              {/* Categories */}
-              <div className="filter-group">
-                <h4 className="filter-group-title">Category</h4>
-                <div className="filter-chips-list">
-                  <button
-                    onClick={() => setSelectedCategory('all')}
-                    className={`filter-chip-btn ${selectedCategory === 'all' ? 'active' : ''}`}
-                  >
-                    <span>All Appliances</span>
-                    <span className="filter-chip-count">{ALL_PRODUCTS.length}</span>
-                  </button>
-                  {CATEGORIES.map((cat) => {
-                    const count = ALL_PRODUCTS.filter((p) => p.category === cat.id).length;
-                    return (
-                      <button
-                        key={cat.id}
-                        onClick={() => setSelectedCategory(cat.id)}
-                        className={`filter-chip-btn ${selectedCategory === cat.id ? 'active' : ''}`}
-                      >
-                        <span>
-                          {cat.icon} {cat.name}
-                        </span>
-                        <span className="filter-chip-count">{count}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Brands */}
-              <div className="filter-group">
-                <h4 className="filter-group-title">Brand</h4>
-                <div className="filter-chips-list">
-                  <button
-                    onClick={() => setSelectedBrand('All')}
-                    className={`filter-chip-btn ${selectedBrand === 'All' ? 'active' : ''}`}
-                  >
-                    <span>All Brands</span>
-                  </button>
-                  {BRANDS.map((brand) => (
-                    <button
-                      key={brand}
-                      onClick={() => setSelectedBrand(brand)}
-                      className={`filter-chip-btn ${selectedBrand === brand ? 'active' : ''}`}
-                    >
-                      <span>{brand}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Max Price Range Slider */}
-              <div className="filter-group">
-                <h4 className="filter-group-title">
-                  Max Price: {formatLKR(maxPrice)}
-                </h4>
-                <input
-                  type="range"
-                  min="50000"
-                  max="600000"
-                  step="10000"
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(Number(e.target.value))}
-                  style={{ width: '100%', cursor: 'pointer', accentColor: 'var(--color-primary)' }}
-                />
-              </div>
-            </aside>
-
-            {/* Products Grid & Toolbar */}
-            <section>
-              {/* Toolbar */}
-              <div className="catalog-toolbar">
-                <div className="catalog-results-count">
-                  Showing <strong>{sortedProducts.length}</strong> appliances
-                  {selectedCategory !== 'all' && (
-                    <span> in {CATEGORIES.find((c) => c.id === selectedCategory)?.name}</span>
-                  )}
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <label style={{ fontSize: '0.8125rem', color: '#64748b', fontWeight: 600 }}>
-                    Sort By:
-                  </label>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="catalog-sort-select"
-                  >
-                    <option value="featured">Featured & Recommended</option>
-                    <option value="price-asc">Price: Low to High</option>
-                    <option value="price-desc">Price: High to Low</option>
-                    <option value="rating">Highest Customer Rating</option>
-                    <option value="discount">Biggest Discount</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Products List */}
-              {sortedProducts.length === 0 ? (
-                <div
-                  style={{
-                    backgroundColor: '#ffffff',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: '12px',
-                    padding: '60px 20px',
-                    textAlign: 'center',
-                  }}
-                >
-                  <div style={{ fontSize: '3rem', marginBottom: '14px' }}>ðŸ”</div>
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-dark)' }}>
-                    No matching appliances found
-                  </h3>
-                  <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem', margin: '8px 0 20px' }}>
-                    Try changing your category, adjusting the price slider, or resetting filters.
-                  </p>
-                  <button
-                    onClick={resetFilters}
-                    style={{
-                      padding: '10px 24px',
-                      backgroundColor: 'var(--color-primary)',
-                      color: '#ffffff',
-                      borderRadius: '50px',
-                      fontWeight: 600,
-                      fontSize: '0.875rem',
-                    }}
-                  >
-                    Reset All Filters
-                  </button>
-                </div>
-              ) : (
-                <div className="products-grid">
-                  {sortedProducts.map((product) => {
-                    const isWishlisted = wishlist.includes(product.id);
-                    return (
-                      <div key={product.id} className="product-card">
-                        {/* Badges on Top Left */}
-                        {product.badge && (
-                          <div className="product-badges">
-                            <span className="badge-tag badge-discount">
-                              {product.badge}
-                            </span>
-                          </div>
-                        )}
-
-                        {/* Product Image & Hover Actions */}
-                        <div className="product-img-wrap">
-                          <Link href={`/products/${product.id}`} style={{ display: 'contents' }}>
-                            <img
-                              src={product.image}
-                              alt={product.name}
-                              className="product-img"
-                              loading="lazy"
-                              style={{ borderRadius: '8px' }}
-                            />
-                          </Link>
-
-                          {/* 4-Icon Action Overlay */}
-                          <div className="product-action-dock">
-                            {/* 1. Add to Cart */}
-                            <button
-                              className="product-action-btn"
-                              onClick={() => addToCart(product.id)}
-                              aria-label="Add to cart"
-                              title="Add to Cart"
-                            >
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="9" cy="21" r="1"></circle>
-                                <circle cx="20" cy="21" r="1"></circle>
-                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                              </svg>
-                            </button>
-
-                            {/* 2. Wishlist */}
-                            <button
-                              className="product-action-btn"
-                              onClick={() => toggleWishlist(product.id)}
-                              aria-label="Toggle Wishlist"
-                              title="Save to Wishlist"
-                              style={isWishlisted ? { backgroundColor: '#266bf9' } : {}}
-                            >
-                              <svg
-                                viewBox="0 0 24 24"
-                                fill={isWishlisted ? '#ffffff' : 'none'}
-                                stroke="currentColor"
-                                strokeWidth="2"
-                              >
-                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                              </svg>
-                            </button>
-
-                            {/* 3. Direct WhatsApp */}
-                            <button
-                              className="product-action-btn"
-                              onClick={() => {
-                                const msg = encodeURIComponent(
-                                  `Hi Smart Choice LK! I am interested in ${product.name} priced at ${formatLKR(product.price)}. Is it available in stock?`
-                                );
-                                window.open(`https://wa.me/94771234567?text=${msg}`, '_blank');
-                              }}
-                              aria-label="WhatsApp Inquiry"
-                              title="WhatsApp Inquiry"
-                            >
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-                              </svg>
-                            </button>
-
-                            {/* 4. Quick View */}
-                            <button
-                              className="product-action-btn"
-                              onClick={() => setQuickViewProduct(product)}
-                              aria-label="Quick View"
-                              title="Quick View"
-                            >
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Meta Info */}
-                        <div className="product-category">
-                          {product.brand} â€¢ {product.capacity || product.category}
-                        </div>
-                        <h4 className="product-title">
-                          <Link href={`/products/${product.id}`}>{product.name}</Link>
-                        </h4>
-                        <div className="product-price-wrap">
-                          <span>{formatLKR(product.price)}</span>
-                          {product.originalPrice && product.originalPrice > product.price && (
-                            <span className="product-old-price">
-                              {formatLKR(product.originalPrice)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
-          </div>
+      <div>
+        <div className="mb-3 flex items-baseline justify-between">
+          <h3 className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Max price</h3>
+          <span className="font-display text-sm font-bold text-ink">{formatLKR(maxPrice)}</span>
         </div>
-      </main>
+        <input
+          type="range"
+          min={50000}
+          max={MAX_PRICE}
+          step={10000}
+          value={maxPrice}
+          onChange={(e) => setMaxPrice(Number(e.target.value))}
+          aria-label="Maximum price"
+          className="w-full cursor-pointer accent-electric"
+        />
+        <div className="mt-1 flex justify-between text-[11px] text-slate-400">
+          <span>{formatLKR(50000)}</span>
+          <span>{formatLKR(MAX_PRICE)}</span>
+        </div>
+      </div>
 
-      {/* Trust Ribbon */}
-      <TrustRibbon />
+      <div className="rounded-2xl bg-ink p-5 text-white">
+        <p className="font-display font-semibold">Not sure which one?</p>
+        <p className="mt-1 text-sm text-white/60">Tell us your room size and budget — we’ll recommend the right model.</p>
+        <a
+          href={whatsappLink('Hi Smart Choice LK! Can you help me pick the right appliance?')}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-4 inline-flex rounded-full bg-[#25D366] px-4 py-2.5 text-sm font-bold"
+        >
+          Ask on WhatsApp
+        </a>
+      </div>
+    </div>
+  );
+}
 
-      {/* Global Footer */}
-      <SiteFooter />
+function Catalog() {
+  const params = useSearchParams();
+  const router = useRouter();
 
-      {/* Quick View Modal */}
-      {quickViewProduct && (
-        <div className="modal-backdrop" onClick={() => setQuickViewProduct(null)}>
-          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="modal-close-btn"
-              onClick={() => setQuickViewProduct(null)}
-              aria-label="Close Modal"
-            >
-              âœ•
+  const [category, setCategory] = useState(params.get('category') || 'all');
+  const [query, setQuery] = useState(params.get('query') || '');
+  const [brand, setBrand] = useState('All');
+  const [inverterOnly, setInverterOnly] = useState(false);
+  const [maxPrice, setMaxPrice] = useState(MAX_PRICE);
+  const [sortBy, setSortBy] = useState('featured');
+  const [drawer, setDrawer] = useState(false);
+
+  // Keep in sync when the navbar changes ?category= / ?query= without remounting
+  useEffect(() => {
+    setCategory(params.get('category') || 'all');
+    setQuery(params.get('query') || '');
+  }, [params]);
+
+  const pickCategory = (id: string) => {
+    setCategory(id);
+    const sp = new URLSearchParams();
+    if (id !== 'all') sp.set('category', id);
+    if (query) sp.set('query', query);
+    router.replace(`/products${sp.toString() ? `?${sp}` : ''}`, { scroll: false });
+  };
+
+  const reset = () => {
+    setBrand('All');
+    setInverterOnly(false);
+    setMaxPrice(MAX_PRICE);
+    setQuery('');
+    pickCategory('all');
+  };
+
+  const products = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const list = ALL_PRODUCTS.filter((p) => {
+      if (category !== 'all' && p.category !== category) return false;
+      if (brand !== 'All' && p.brand !== brand) return false;
+      if (inverterOnly && !p.inverter) return false;
+      if (p.price > maxPrice) return false;
+      if (q && !`${p.name} ${p.brand ?? ''} ${p.category}`.toLowerCase().includes(q)) return false;
+      return true;
+    });
+    if (sortBy === 'price-asc') list.sort((a, b) => a.price - b.price);
+    if (sortBy === 'price-desc') list.sort((a, b) => b.price - a.price);
+    if (sortBy === 'rating') list.sort((a, b) => b.rating - a.rating);
+    if (sortBy === 'discount') list.sort((a, b) => (b.discount || 0) - (a.discount || 0));
+    return list;
+  }, [category, brand, inverterOnly, maxPrice, query, sortBy]);
+
+  const catName = CATEGORIES.find((c) => c.id === category)?.name;
+  const activeFilters = (brand !== 'All' ? 1 : 0) + (inverterOnly ? 1 : 0) + (maxPrice < MAX_PRICE ? 1 : 0);
+
+  useEffect(() => {
+    document.body.style.overflow = drawer ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [drawer]);
+
+  const filterProps = { brand, setBrand, inverterOnly, setInverterOnly, maxPrice, setMaxPrice, reset };
+
+  return (
+    <div className="bg-mist font-sans text-ink antialiased">
+      <SiteNavbar />
+
+      <PageHeader
+        eyebrow="Shop"
+        title={catName ?? 'All appliances'}
+        sub="Genuine brands, fair prices, delivered and installed anywhere in Sri Lanka."
+        crumbs={catName ? [{ label: 'Shop', href: '/products' }, { label: catName }] : [{ label: 'Shop' }]}
+      >
+        {/* Search */}
+        <div className="mt-8 flex max-w-xl items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] px-4 backdrop-blur-md focus-within:border-electric/60">
+          <Search className="h-5 w-5 shrink-0 text-white/50" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by name or brand…"
+            aria-label="Search products"
+            className="h-14 flex-1 bg-transparent text-white placeholder:text-white/40 focus:outline-none"
+          />
+          {query && (
+            <button onClick={() => setQuery('')} aria-label="Clear search" className="text-white/50 hover:text-white">
+              <X className="h-4 w-4" />
             </button>
+          )}
+        </div>
+      </PageHeader>
 
-            <div className="quick-view-grid">
-              <div className="quick-view-img-wrap">
-                <img
-                  src={quickViewProduct.image}
-                  alt={quickViewProduct.name}
-                  className="quick-view-img"
-                  style={{ borderRadius: '10px' }}
-                />
-              </div>
+      {/* Category rail */}
+      <div className="sticky top-[76px] z-30 border-b border-slate-200/80 bg-mist/85 backdrop-blur-xl">
+        <div className="sc-no-scrollbar mx-auto flex max-w-[1280px] gap-2 overflow-x-auto px-5 py-3">
+          {[{ id: 'all', name: 'All' }, ...CATEGORIES].map((c) => {
+            const Icon = CAT_ICON[c.id] ?? LayoutGrid;
+            const active = category === c.id;
+            const count = c.id === 'all' ? ALL_PRODUCTS.length : ALL_PRODUCTS.filter((p) => p.category === c.id).length;
+            return (
+              <button
+                key={c.id}
+                onClick={() => pickCategory(c.id)}
+                aria-pressed={active}
+                className={`relative flex shrink-0 items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-colors ${
+                  active ? 'text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:text-ink'
+                }`}
+              >
+                {active && (
+                  <motion.span
+                    layoutId="cat-pill"
+                    className="absolute inset-0 rounded-full bg-ink"
+                    transition={{ type: 'spring', stiffness: 400, damping: 34 }}
+                  />
+                )}
+                <Icon className="relative h-4 w-4" />
+                <span className="relative">{c.name.split(' & ')[0]}</span>
+                <span className={`relative text-xs ${active ? 'text-white/50' : 'text-slate-400'}`}>{count}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
-              <div>
-                <span
-                  style={{
-                    color: '#266bf9',
-                    fontSize: '0.8125rem',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  {quickViewProduct.brand} â€¢ {quickViewProduct.category}
-                </span>
-                <h3
-                  style={{
-                    fontSize: '1.45rem',
-                    fontWeight: 700,
-                    color: '#212529',
-                    margin: '6px 0 10px',
-                    lineHeight: 1.3,
-                  }}
-                >
-                  {quickViewProduct.name}
-                </h3>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'baseline',
-                    gap: '12px',
-                    marginBottom: '16px',
-                  }}
-                >
-                  <span style={{ fontSize: '1.45rem', fontWeight: 800, color: '#266bf9' }}>
-                    {formatLKR(quickViewProduct.price)}
+      <main className="mx-auto grid max-w-[1280px] gap-8 px-5 py-10 lg:grid-cols-[280px_1fr]">
+        <aside className="hidden lg:block">
+          <div className="sticky top-[150px]">
+            <Filters {...filterProps} />
+          </div>
+        </aside>
+
+        <section aria-live="polite">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-slate-500">
+              <span className="font-display text-base font-bold text-ink">{products.length}</span> products
+              {query && (
+                <>
+                  {' '}
+                  for “<span className="font-semibold text-ink">{query}</span>”
+                </>
+              )}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setDrawer(true)}
+                className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-semibold ring-1 ring-slate-200 lg:hidden"
+              >
+                <SlidersHorizontal className="h-4 w-4" /> Filters
+                {activeFilters > 0 && (
+                  <span className="grid h-5 w-5 place-items-center rounded-full bg-electric text-[11px] text-white">
+                    {activeFilters}
                   </span>
-                  {quickViewProduct.originalPrice && quickViewProduct.originalPrice > quickViewProduct.price && (
-                    <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '1rem' }}>
-                      {formatLKR(quickViewProduct.originalPrice)}
-                    </span>
-                  )}
-                </div>
-
-                <div
-                  style={{
-                    display: 'inline-block',
-                    padding: '4px 10px',
-                    backgroundColor: '#ecfdf5',
-                    color: '#047857',
-                    borderRadius: '4px',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    marginBottom: '14px',
-                  }}
-                >
-                  ðŸ›¡ï¸ {quickViewProduct.warranty || 'Official Agent Warranty'}
-                </div>
-
-                <p style={{ color: '#555', fontSize: '0.875rem', lineHeight: '1.6', marginBottom: '18px' }}>
-                  {quickViewProduct.description}
-                </p>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                  <button
-                    onClick={() => {
-                      addToCart(quickViewProduct.id);
-                      setQuickViewProduct(null);
-                    }}
-                    style={{
-                      backgroundColor: '#266bf9',
-                      color: '#ffffff',
-                      padding: '10px 24px',
-                      borderRadius: '50px',
-                      fontSize: '0.9rem',
-                      fontWeight: 600,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      boxShadow: '0 4px 14px rgba(38,107,249,0.3)',
-                    }}
-                  >
-                    Add To Cart
-                  </button>
-
-                  <Link
-                    href={`/products/${quickViewProduct.id}`}
-                    style={{
-                      padding: '10px 20px',
-                      backgroundColor: '#f1f5f9',
-                      color: '#212529',
-                      borderRadius: '50px',
-                      fontSize: '0.85rem',
-                      fontWeight: 600,
-                    }}
-                  >
-                    View Full Details â†’
-                  </Link>
-                </div>
-              </div>
+                )}
+              </button>
+              <label className="sr-only" htmlFor="sort">
+                Sort by
+              </label>
+              <select
+                id="sort"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="cursor-pointer rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-ink ring-1 ring-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-electric"
+              >
+                {SORTS.map((s) => (
+                  <option key={s.v} value={s.v}>
+                    {s.l}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
-        </div>
-      )}
+
+          {products.length === 0 ? (
+            <div className="grid place-items-center rounded-[28px] bg-white px-6 py-20 text-center ring-1 ring-slate-200">
+              <span className="grid h-14 w-14 place-items-center rounded-2xl bg-mist text-slate-400">
+                <Search className="h-6 w-6" />
+              </span>
+              <h3 className="mt-5 font-display text-xl font-bold">No products match</h3>
+              <p className="mt-2 max-w-sm text-sm text-slate-500">
+                Try another category, raise the price limit or reset the filters. Or ask us — we can often order it in.
+              </p>
+              <div className="mt-6 flex gap-2">
+                <button onClick={reset} className="rounded-full bg-ink px-5 py-3 text-sm font-bold text-white">
+                  Reset filters
+                </button>
+                <a
+                  href={whatsappLink(`Hi! Do you have ${query || 'this appliance'}?`)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-full bg-[#25D366] px-5 py-3 text-sm font-bold text-white"
+                >
+                  Ask on WhatsApp
+                </a>
+              </div>
+            </div>
+          ) : (
+            <motion.div layout className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <AnimatePresence mode="popLayout">
+                {products.map((p) => (
+                  <motion.div
+                    key={p.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.96 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.96 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ProductCard product={p} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </section>
+      </main>
+
+      {/* Mobile filter drawer */}
+      <AnimatePresence>
+        {drawer && (
+          <motion.div
+            className="fixed inset-0 z-[1250] bg-ink/60 backdrop-blur-sm lg:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setDrawer(false)}
+          >
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Filters"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 320, damping: 34 }}
+              className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-[28px] bg-mist p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-slate-300" />
+              <Filters {...filterProps} />
+              <button
+                onClick={() => setDrawer(false)}
+                className="mt-6 w-full rounded-full bg-ink py-4 font-bold text-white"
+              >
+                Show {products.length} products
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <TrustRibbon />
+      <SiteFooter />
     </div>
   );
 }
 
 export default function ProductsPage() {
   return (
-    <Suspense fallback={<div style={{ padding: '60px', textAlign: 'center' }}>Loading Catalog...</div>}>
-      <ProductsCatalogContent />
+    <Suspense fallback={<div className="min-h-screen bg-ink" />}>
+      <Catalog />
     </Suspense>
   );
 }
-
