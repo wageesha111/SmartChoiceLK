@@ -48,12 +48,13 @@ export default function EnergyCalculator() {
   return (
     <div
       style={{
-        background: 'radial-gradient(ellipse at 80% 50%, #1e3a8a 0%, #0f172a 60%, #020617 100%)',
+        background: 'linear-gradient(160deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+        backdropFilter: 'blur(18px)',
         color: '#ffffff',
-        borderRadius: '20px',
-        padding: '44px 36px',
-        border: '1px solid rgba(56, 189, 248, 0.25)',
-        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.35)',
+        borderRadius: '28px',
+        padding: 'clamp(24px, 4vw, 40px)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: '0 40px 80px -30px rgba(0, 0, 0, 0.6)',
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -61,7 +62,7 @@ export default function EnergyCalculator() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
           gap: '36px',
           alignItems: 'center',
           position: 'relative',
@@ -87,7 +88,7 @@ export default function EnergyCalculator() {
               marginBottom: '12px',
             }}
           >
-            âš¡ Sri Lanka Inverter Energy Calculator
+            ⚡ Sri Lanka Inverter Energy Calculator
           </div>
 
           <h3 style={{ fontSize: '1.85rem', fontWeight: 800, color: '#ffffff', lineHeight: 1.25, marginBottom: '10px' }}>
@@ -113,7 +114,7 @@ export default function EnergyCalculator() {
                 transition: 'all 0.2s ease',
               }}
             >
-              â„ï¸ Inverter Air Conditioner
+              ❄️ Inverter Air Conditioner
             </button>
             <button
               onClick={() => setApplianceType('fridge')}
@@ -129,7 +130,7 @@ export default function EnergyCalculator() {
                 transition: 'all 0.2s ease',
               }}
             >
-              ðŸ§Š Inverter Refrigerator
+              🧊 Inverter Refrigerator
             </button>
           </div>
 
@@ -286,7 +287,7 @@ export default function EnergyCalculator() {
             }}
           >
             <span>Browse 5-Star Inverters</span>
-            <span>â†’</span>
+            <span>→</span>
           </Link>
         </div>
       </div>
