@@ -155,7 +155,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const showToast = (message: string, emoji = 'âœ¨') => {
+  const showToast = (message: string, emoji = '✨') => {
     setToast({ message, emoji });
     triggerHaptic('success');
     setTimeout(() => {
@@ -177,7 +177,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       return [...prev, { ...product, qty }];
     });
 
-    showToast(`Added ${product.name.slice(0, 25)}... to cart`, 'ðŸ›’');
+    showToast(`Added ${product.name.slice(0, 25)}... to cart`, '🛒');
   };
 
   const changeQty = (productId: number, delta: number) => {
@@ -198,7 +198,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const removeFromCart = (productId: number) => {
     triggerHaptic('remove');
     setCart((prev) => prev.filter((item) => item.id !== productId));
-    showToast('Item removed from cart', 'ðŸ—‘ï¸');
+    showToast('Item removed from cart', '🗑️');
   };
 
   const clearCart = () => {
@@ -210,10 +210,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setWishlist((prev) => {
       const exists = prev.includes(productId);
       if (exists) {
-        showToast('Removed from wishlist', 'ðŸ¤');
+        showToast('Removed from wishlist', '🤍');
         return prev.filter((id) => id !== productId);
       } else {
-        showToast('Saved to your wishlist', 'â¤ï¸');
+        showToast('Saved to your wishlist', '❤️');
         return [...prev, productId];
       }
     });
@@ -223,14 +223,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     triggerHaptic('light');
     setCompareList((prev) => {
       if (prev.includes(productId)) {
-        showToast('Removed from comparison', 'âš–ï¸');
+        showToast('Removed from comparison', '⚖️');
         return prev.filter((id) => id !== productId);
       }
       if (prev.length >= 4) {
-        showToast('You can compare maximum 4 appliances at a time', 'âš ï¸');
+        showToast('You can compare maximum 4 appliances at a time', '⚠️');
         return prev;
       }
-      showToast('Added to appliance comparison', 'âš–ï¸');
+      showToast('Added to appliance comparison', '⚖️');
       return [...prev, productId];
     });
   };
@@ -260,19 +260,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const login = (newUser: User) => {
     setUser(newUser);
     localStorage.setItem('smartchoice-user', JSON.stringify(newUser));
-    showToast(`Welcome back, ${newUser.name}!`, 'ðŸ‘‹');
+    showToast(`Welcome back, ${newUser.name}!`, '👋');
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('smartchoice-user');
-    showToast('Signed out successfully', 'ðŸ‘‹');
+    showToast('Signed out successfully', '👋');
   };
 
   const addOrder = (order: Order) => {
     setOrders((prev) => [order, ...prev]);
     clearCart();
-    showToast(`Order #${order.id} confirmed!`, 'ðŸŽ‰');
+    showToast(`Order #${order.id} confirmed!`, '🎉');
   };
 
   const updateOrderStatus = (orderId: string, status: string) => {
@@ -284,7 +284,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const reorderItems = (items: CartItem[]) => {
     items.forEach((item) => addToCart(item.id, item.qty));
     setIsCartOpen(true);
-    showToast('Items added to cart', 'ðŸ›’');
+    showToast('Items added to cart', '🛒');
   };
 
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
