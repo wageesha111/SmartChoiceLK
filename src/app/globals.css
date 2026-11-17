@@ -6,7 +6,6 @@
    SMART CHOICE LK — MODERN E-COMMERCE STYLESHEET
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
 
 :root {
   /* Shadcn / Tailwind Theme Variables */
@@ -20,8 +19,8 @@
   --radius: 0.5rem;
 
   /* Primary & Accent Colors */
-  --color-primary: #266bf9;        /* Bright Blue */
-  --color-primary-hover: #1754db;
+  --color-primary: #2F6BFF;        /* Smart Choice Electric Blue */
+  --color-primary-hover: #1F55E6;
   --color-dark: #212529;           /* Dark Navy / Almost Black */
   --color-darker: #181a20;         /* Top Bar Navy */
   --color-red: #d3122a;            /* Vibrant Red Promotional Banner */
@@ -36,10 +35,12 @@
   --color-text-light: #999999;
 
   /* Typography */
-  --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Sora', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family: var(--font-body);
 
   /* Layout */
-  --container-max-width: 1200px;
+  --container-max-width: 1280px;
   --border-radius-sm: 4px;
   --border-radius-md: 8px;
   --border-radius-lg: 12px;
@@ -1141,7 +1142,7 @@ input, select, textarea {
 }
 
 .offer-specs-list li::before {
-  content: 'â€¢';
+  content: '•';
   position: absolute;
   left: 0;
   color: var(--color-primary);
@@ -2575,4 +2576,60 @@ input, select, textarea {
   .navbar-blue {
     display: none !important;
   }
+}
+
+/* ==========================================================================
+   2026 REFRESH — shared modern layer
+   ========================================================================== */
+h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0.02em; }
+::selection { background: #2F6BFF; color: #fff; }
+.sc-grid-bg {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 40%, transparent 100%);
+          mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 40%, transparent 100%);
+}
+.sc-noise::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .06; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.sc-text-gradient {
+  background: linear-gradient(100deg, #ffffff 0%, #A9C3FF 35%, #2F6BFF 60%, #38BDF8 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.sc-chrome-text {
+  background: linear-gradient(90deg, #8DB0FF, #ffffff, #8DB0FF);
+  background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.sc-no-scrollbar::-webkit-scrollbar { display: none; }
+.sc-no-scrollbar { scrollbar-width: none; }
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee, .animate-marquee-fast, .animate-floaty, .animate-spinslow, .animate-shine { animation: none !important; }
+}
+
+/* Border beam (animated light travelling around a card edge) */
+@property --sc-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+.sc-border-beam {
+  padding: 1.5px;
+  background: conic-gradient(from var(--sc-angle), transparent 0 72%, #2F6BFF 82%, #38BDF8 88%, transparent 94%) border-box;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: sc-beam var(--beam-duration, 7s) linear infinite;
+}
+@keyframes sc-beam { to { --sc-angle: 360deg; } }
+/* Shimmer sweep for primary CTAs */
+.sc-shimmer { position: relative; overflow: hidden; isolation: isolate; }
+.sc-shimmer::after {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(110deg, transparent 25%, rgba(255,255,255,.35) 50%, transparent 75%);
+  transform: translateX(-120%); animation: sc-shimmer 3.2s ease-in-out infinite;
+}
+@keyframes sc-shimmer { 60%, 100% { transform: translateX(120%); } }
+:focus-visible { outline: 2px solid #2F6BFF; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .sc-border-beam, .sc-shimmer::after { animation: none !important; }
 }
