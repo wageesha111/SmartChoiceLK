@@ -1,320 +1,342 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useStore } from '@/context/StoreContext';
-import { NavBar, NavItem } from '@/components/ui/tubelight-navbar';
+import { SITE, whatsappLink } from '@/lib/site';
+import { WhatsAppIcon } from '@/components/FloatingActions';
 import {
-  Home,
-  LayoutGrid,
-  Snowflake,
-  Refrigerator,
-  Disc3,
-  Tv,
-  Info,
-  PhoneCall,
   Search,
   Heart,
-  ShoppingCart,
+  ShoppingBag,
   Menu,
   X,
+  Phone,
+  ArrowUpRight,
+  Snowflake,
+  Refrigerator,
+  WashingMachine,
+  Tv,
+  CookingPot,
+  LayoutGrid,
 } from 'lucide-react';
 
-export default function SiteNavbar() {
+const NAV_LINKS = [
+  { name: 'Home', url: '/' },
+  { name: 'Shop', url: '/products' },
+  { name: 'ACs', url: '/products?category=air-conditioners', cat: 'air-conditioners' },
+  { name: 'Fridges', url: '/products?category=refrigerators', cat: 'refrigerators' },
+  { name: 'Washers', url: '/products?category=washing-machines', cat: 'washing-machines' },
+  { name: 'TVs', url: '/products?category=televisions', cat: 'televisions' },
+  { name: 'About', url: '/about' },
+  { name: 'Contact', url: '/contact' },
+];
+
+const QUICK_CATS = [
+  { name: 'Air Conditioners', url: '/products?category=air-conditioners', icon: Snowflake },
+  { name: 'Refrigerators', url: '/products?category=refrigerators', icon: Refrigerator },
+  { name: 'Washing Machines', url: '/products?category=washing-machines', icon: WashingMachine },
+  { name: 'Televisions', url: '/products?category=televisions', icon: Tv },
+  { name: 'Kitchen', url: '/products?category=kitchen', icon: CookingPot },
+  { name: 'All Products', url: '/products', icon: LayoutGrid },
+];
+
+const ANNOUNCEMENTS = [
+  'Islandwide delivery to all 25 districts',
+  `Call or WhatsApp ${SITE.phoneDisplay}`,
+  'Genuine products with brand warranty',
+  'Easy installment plans available',
+  `Visit us at ${SITE.address}`,
+  `${SITE.facebookRecommend} recommended on Facebook`,
+];
+
+function useActiveLink() {
   const pathname = usePathname();
+  const params = useSearchParams();
+  return (link: (typeof NAV_LINKS)[number]) => {
+    if (link.url === '/') return pathname === '/';
+    if (link.cat) return pathname?.startsWith('/products') && params?.get('category') === link.cat;
+    if (link.url === '/products') return pathname?.startsWith('/products') && !params?.get('category');
+    return pathname === link.url;
+  };
+}
+
+function NavInner() {
   const router = useRouter();
+  const isActive = useActiveLink();
   const { cartCount, wishlist, setIsCartOpen, setIsWishlistOpen } = useStore();
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (searchOpen) setTimeout(() => inputRef.current?.focus(), 60);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSearchOpen(false);
+        setMenuOpen(false);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [searchOpen]);
+
+  useEffect(() => {
+    document.body.style.overflow = menuOpen || searchOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [menuOpen, searchOpen]);
+
+  const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/products?query=${encodeURIComponent(searchQuery.trim())}`);
-      setMobileMenuOpen(false);
-    }
+    if (!query.trim()) return;
+    router.push(`/products?query=${encodeURIComponent(query.trim())}`);
+    setSearchOpen(false);
+    setMenuOpen(false);
   };
 
-  const navItems: NavItem[] = [
-    { name: 'Home', url: '/', icon: Home },
-    { name: 'All Appliances', url: '/products', icon: LayoutGrid },
-    { name: 'Air Conditioners', url: '/products?category=air-conditioners', icon: Snowflake },
-    { name: 'Refrigerators', url: '/products?category=refrigerators', icon: Refrigerator },
-    { name: 'Washing Machines', url: '/products?category=washing-machines', icon: Disc3 },
-    { name: 'Televisions', url: '/products?category=televisions', icon: Tv },
-    { name: 'About Us', url: '/about', icon: Info },
-    { name: 'Contact', url: '/contact', icon: PhoneCall },
-  ];
-
-  const activeTabName = useMemo(() => {
-    if (pathname === '/') return 'Home';
-    if (pathname === '/about') return 'About Us';
-    if (pathname === '/contact') return 'Contact';
-    if (pathname?.startsWith('/products')) {
-      if (typeof window !== 'undefined') {
-        const params = new URLSearchParams(window.location.search);
-        const cat = params.get('category');
-        if (cat === 'air-conditioners') return 'Air Conditioners';
-        if (cat === 'refrigerators') return 'Refrigerators';
-        if (cat === 'washing-machines') return 'Washing Machines';
-        if (cat === 'televisions') return 'Televisions';
-      }
-      return 'All Appliances';
-    }
-    return 'Home';
-  }, [pathname]);
+  const iconBtn =
+    'relative grid h-10 w-10 place-items-center rounded-full text-white/80 transition-colors hover:bg-white/10 hover:text-white';
 
   return (
     <>
-      {/* 1. TOP BAR */}
-      <div className="top-bar">
-        <div className="container top-bar-inner">
-          <div className="top-bar-left">
-            <span>
-              🚚 Islandwide Safe Delivery & Certified Inverter Installation Across All 25 Districts in Sri Lanka
+      {/* Announcement marquee */}
+      <div className="relative z-[60] overflow-hidden border-b border-white/10 bg-ink text-[12.5px] font-medium text-white/70">
+        <div className="flex w-max animate-marquee gap-10 py-2">
+          {[...ANNOUNCEMENTS, ...ANNOUNCEMENTS].map((t, i) => (
+            <span key={i} className="flex items-center gap-10 whitespace-nowrap">
+              <span>{t}</span>
+              <span className="h-1 w-1 rounded-full bg-electric" />
             </span>
-          </div>
-          <div className="top-bar-right">
-            <a href="tel:+94112345678" className="top-bar-item">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-              </svg>
-              <span>+94 11 234 5678</span>
-            </a>
-            <a href="mailto:sales@smartchoicelk.com" className="top-bar-item">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-              </svg>
-              <span>sales@smartchoicelk.com</span>
-            </a>
-            <a
-              href="https://wa.me/94771234567?text=Hello%20Smart%20Choice%20LK%2C%20I%20want%20to%20inquire%20about%20appliances"
-              target="_blank"
-              rel="noreferrer"
-              className="top-bar-item"
-              style={{ color: '#25D366' }}
-            >
-              <span>💬 WhatsApp: +94 77 123 4567</span>
-            </a>
-          </div>
+          ))}
         </div>
       </div>
 
-      {/* 2. MAIN HEADER (Logo, Prominent Search Bar, Wishlist & Cart) */}
-      <header className="main-header">
-        <div className="container main-header-inner">
-          {/* Brand Logo */}
-          <Link
-            href="/"
-            className="brand-logo"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}
-          >
-            <img
-              src="/smart-choice-logo.png"
-              alt="Smart Choice LK"
-              style={{
-                height: '44px',
-                width: 'auto',
-                maxWidth: '60px',
-                objectFit: 'contain',
-                filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))',
-              }}
-            />
-            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
-              <span style={{ fontSize: '1.45rem', fontWeight: 800, color: '#ffffff' }}>
-                Smart Choice<span style={{ color: 'var(--color-primary)' }}>.LK</span>
+      {/* Sticky glass header */}
+      <header className="sticky top-0 z-[50] px-3 pt-3 sm:px-5">
+        <div
+          className={`mx-auto flex h-16 max-w-[1280px] items-center gap-3 rounded-2xl border px-3 transition-all duration-500 sm:px-4 ${
+            scrolled
+              ? 'border-white/10 bg-ink/80 shadow-[0_20px_50px_-20px_rgba(5,11,26,0.8)] backdrop-blur-xl'
+              : 'border-white/[0.07] bg-ink-800/95 backdrop-blur-md'
+          }`}
+        >
+          {/* Logo */}
+          <Link href="/" className="flex shrink-0 items-center gap-2.5" aria-label={`${SITE.name} home`}>
+            <span className="grid h-10 w-12 place-items-center rounded-xl bg-gradient-to-br from-electric to-electric-700 shadow-[0_0_24px_-4px_rgba(47,107,255,0.8)]">
+              <img src="/brand/sc-mark-white.png" alt="" className="h-5 w-auto" />
+            </span>
+            <span className="hidden leading-none sm:block">
+              <span className="block font-display text-[17px] font-bold tracking-tight text-white">
+                Smart Choice<span className="text-electric-400"> LK</span>
               </span>
-              <span
-                style={{
-                  fontSize: '0.65rem',
-                  letterSpacing: '0.12em',
-                  textTransform: 'uppercase',
-                  color: '#9ca3af',
-                  fontWeight: 600,
-                }}
-              >
-                Choose Smart. Live Better.
+              <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45">
+                {SITE.tagline}
               </span>
-            </div>
+            </span>
           </Link>
 
-          {/* Prominent Search Bar (Search included as requested) */}
-          <form className="header-search-form" onSubmit={handleSearchSubmit}>
-            <input
-              type="text"
-              className="header-search-input"
-              placeholder="Search Inverter ACs, Refrigerators, Washing Machines, 4K TVs..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button type="submit" className="header-search-btn" aria-label="Search">
-              <Search size={18} strokeWidth={2.5} />
-            </button>
-          </form>
+          {/* Desktop links */}
+          <nav className="mx-auto hidden items-center gap-1 lg:flex" aria-label="Main">
+            {NAV_LINKS.map((link) => {
+              const active = isActive(link);
+              return (
+                <Link
+                  key={link.url}
+                  href={link.url}
+                  className={`relative whitespace-nowrap rounded-full px-3.5 py-2 text-[13.5px] font-semibold transition-colors ${
+                    active ? 'text-white' : 'text-white/60 hover:text-white'
+                  }`}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="nav-pill"
+                      className="absolute inset-0 -z-0 rounded-full bg-white/10 ring-1 ring-white/15"
+                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    />
+                  )}
+                  <span className="relative">{link.name}</span>
+                </Link>
+              );
+            })}
+          </nav>
 
-          {/* Right Header Actions */}
-          <div className="header-actions">
-            {/* Wishlist Button */}
-            <button
-              className="header-action-btn"
-              onClick={() => setIsWishlistOpen(true)}
-              aria-label="Wishlist"
-              title="View Wishlist"
-            >
-              <Heart
-                size={22}
-                strokeWidth={2}
-                fill={wishlist.length > 0 ? '#266bf9' : 'none'}
-                color={wishlist.length > 0 ? '#266bf9' : 'currentColor'}
-              />
+          {/* Actions */}
+          <div className="ml-auto flex items-center gap-1 lg:ml-0">
+            <button onClick={() => setSearchOpen(true)} className={iconBtn} aria-label="Search">
+              <Search className="h-[19px] w-[19px]" />
+            </button>
+            <button onClick={() => setIsWishlistOpen(true)} className={iconBtn} aria-label="Wishlist">
+              <Heart className="h-[19px] w-[19px]" fill={wishlist.length ? 'currentColor' : 'none'} />
               {wishlist.length > 0 && (
-                <span className="header-badge">{wishlist.length}</span>
+                <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
+                  {wishlist.length}
+                </span>
               )}
             </button>
-
-            {/* Shopping Cart Button */}
-            <button
-              className="header-action-btn"
-              onClick={() => setIsCartOpen(true)}
-              aria-label="Shopping Cart"
-              title="View Cart"
-            >
-              <ShoppingCart size={22} strokeWidth={2} />
-              <span className="header-badge">{cartCount || 0}</span>
+            <button onClick={() => setIsCartOpen(true)} className={iconBtn} aria-label="Cart">
+              <ShoppingBag className="h-[19px] w-[19px]" />
+              {cartCount > 0 && (
+                <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-electric px-1 text-[10px] font-bold text-white">
+                  {cartCount}
+                </span>
+              )}
             </button>
-
-            {/* Mobile Hamburger Button */}
-            <button
-              className="header-action-btn mobile-hamburger-btn"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle Menu"
+            <a
+              href={`tel:${SITE.phoneTel}`}
+              className="ml-2 hidden items-center gap-2 whitespace-nowrap rounded-full bg-white px-4 py-2.5 text-[13px] font-bold text-ink transition-all hover:bg-electric hover:text-white xl:flex"
             >
-              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              <Phone className="h-4 w-4" />
+              {SITE.phoneDisplay}
+            </a>
+            <button onClick={() => setMenuOpen(true)} className={`${iconBtn} lg:hidden`} aria-label="Open menu">
+              <Menu className="h-5 w-5" />
             </button>
           </div>
         </div>
       </header>
 
-      {/* 3. MODERN TUBELIGHT NAVIGATION BAR */}
-      <nav className="tubelight-nav-row bg-[#081225] border-t border-b border-white/10 py-3 relative z-30 overflow-x-auto">
-        <div className="container flex justify-center items-center">
-          <NavBar
-            items={navItems}
-            activeTab={activeTabName}
-            className="relative bottom-auto sm:top-auto left-auto translate-x-0 mb-0 sm:pt-0 z-auto"
-          />
-        </div>
-      </nav>
-
-      {/* 4. MOBILE SLIDEOUT MENU */}
-      {mobileMenuOpen && (
-        <div
-          className="modal-backdrop"
-          onClick={() => setMobileMenuOpen(false)}
-          style={{ justifyContent: 'flex-start', padding: 0, zIndex: 1200 }}
-        >
-          <div
-            style={{
-              width: '82%',
-              maxWidth: '320px',
-              height: '100%',
-              backgroundColor: '#0c1322',
-              color: '#ffffff',
-              padding: '24px 20px',
-              display: 'flex',
-              flexDirection: 'column',
-              animation: 'slideInLeft 0.25s ease',
-            }}
-            onClick={(e) => e.stopPropagation()}
+      {/* Search overlay */}
+      <AnimatePresence>
+        {searchOpen && (
+          <motion.div
+            className="fixed inset-0 z-[1300] flex items-start justify-center bg-ink/70 px-4 pt-[12vh] backdrop-blur-md"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSearchOpen(false)}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                paddingBottom: '16px',
-                borderBottom: '1px solid rgba(255,255,255,0.1)',
-                marginBottom: '16px',
-              }}
+            <motion.div
+              initial={{ y: -16, opacity: 0, scale: 0.98 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: -10, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+              className="w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-ink-800 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
             >
-              <span style={{ fontSize: '1.15rem', fontWeight: 800 }}>Smart Choice Menu</span>
-              <button
-                onClick={() => setMobileMenuOpen(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#ffffff',
-                  fontSize: '1.25rem',
-                  cursor: 'pointer',
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = activeTabName === item.name;
-                return (
-                  <li key={item.url}>
+              <form onSubmit={submitSearch} className="flex items-center gap-3 border-b border-white/10 px-5">
+                <Search className="h-5 w-5 text-electric-400" />
+                <input
+                  ref={inputRef}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search ACs, fridges, TVs, brands…"
+                  className="h-16 flex-1 bg-transparent text-lg text-white placeholder:text-white/35 focus:outline-none"
+                />
+                <kbd className="hidden rounded-md border border-white/15 px-2 py-1 text-[11px] text-white/50 sm:block">ESC</kbd>
+              </form>
+              <div className="p-5">
+                <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-white/40">Browse categories</p>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {QUICK_CATS.map(({ name, url, icon: Icon }) => (
                     <Link
-                      href={item.url}
-                      onClick={() => setMobileMenuOpen(false)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '12px 14px',
-                        borderRadius: '8px',
-                        color: isActive ? '#266bf9' : '#e2e8f0',
-                        backgroundColor: isActive ? 'rgba(38,107,249,0.14)' : 'transparent',
-                        fontWeight: 600,
-                        fontSize: '0.9375rem',
-                        textDecoration: 'none',
-                      }}
+                      key={url}
+                      href={url}
+                      onClick={() => setSearchOpen(false)}
+                      className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.03] px-4 py-3 text-sm font-semibold text-white/80 transition-all hover:border-electric/50 hover:bg-electric/10 hover:text-white"
                     >
-                      <Icon size={18} />
-                      <span>{item.name}</span>
+                      <Icon className="h-4 w-4 text-electric-400" />
+                      {name}
                     </Link>
-                  </li>
-                );
-              })}
-            </ul>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-            <div
-              style={{
-                marginTop: 'auto',
-                paddingTop: '20px',
-                borderTop: '1px solid rgba(255,255,255,0.1)',
-              }}
+      {/* Mobile menu */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            className="fixed inset-0 z-[1250] bg-ink/60 backdrop-blur-sm lg:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMenuOpen(false)}
+          >
+            <motion.aside
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', stiffness: 320, damping: 34 }}
+              className="absolute right-0 top-0 flex h-full w-[86%] max-w-sm flex-col bg-ink-800 p-5 text-white"
+              onClick={(e) => e.stopPropagation()}
             >
-              <a
-                href="https://wa.me/94771234567"
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  padding: '12px',
-                  backgroundColor: '#25D366',
-                  color: '#ffffff',
-                  borderRadius: '50px',
-                  fontWeight: 700,
-                  fontSize: '0.875rem',
-                  textDecoration: 'none',
-                }}
-              >
-                <span>💬 WhatsApp Hotline</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
+              <div className="mb-6 flex items-center justify-between">
+                <img src="/brand/sc-logo-full-white.png" alt={SITE.name} className="h-14 w-auto" />
+                <button onClick={() => setMenuOpen(false)} className={iconBtn} aria-label="Close menu">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <nav className="flex flex-col">
+                {NAV_LINKS.map((link, i) => (
+                  <motion.div
+                    key={link.url}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.04 * i }}
+                  >
+                    <Link
+                      href={link.url}
+                      onClick={() => setMenuOpen(false)}
+                      className={`flex items-center justify-between border-b border-white/[0.06] py-3.5 font-display text-xl font-semibold ${
+                        isActive(link) ? 'text-electric-400' : 'text-white/85'
+                      }`}
+                    >
+                      {link.name}
+                      <ArrowUpRight className="h-4 w-4 opacity-40" />
+                    </Link>
+                  </motion.div>
+                ))}
+              </nav>
+              <div className="mt-auto grid gap-2 pt-6">
+                <a
+                  href={whatsappLink()}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] py-3.5 font-bold"
+                >
+                  <WhatsAppIcon /> WhatsApp us
+                </a>
+                <a
+                  href={`tel:${SITE.phoneTel}`}
+                  className="flex items-center justify-center gap-2 rounded-2xl border border-white/15 py-3.5 font-bold"
+                >
+                  <Phone className="h-4 w-4" /> {SITE.phoneDisplay}
+                </a>
+              </div>
+            </motion.aside>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
+  );
+}
+
+export default function SiteNavbar() {
+  // useSearchParams needs a Suspense boundary in the App Router
+  return (
+    <React.Suspense fallback={<div className="h-[92px] bg-ink" />}>
+      <NavInner />
+    </React.Suspense>
   );
 }
