@@ -47,7 +47,7 @@ export const SMARTCHOICE_PRODUCTS: SmartChoiceProduct[] = [
   {
     id: 2,
     sku: 'SCLK-RF-SAM680',
-    name: 'Samsung SpaceMaxâ„¢ 680L Side-by-Side Inverter Refrigerator',
+    name: 'Samsung SpaceMax™ 680L Side-by-Side Inverter Refrigerator',
     brand: 'Samsung',
     category: 'Refrigerators',
     price: 445000,
@@ -61,7 +61,7 @@ export const SMARTCHOICE_PRODUCTS: SmartChoiceProduct[] = [
     inverter: true,
     warranty: '20 Years Digital Inverter Compressor Warranty',
     description:
-      'Spacious 680L capacity with SpaceMaxâ„¢ high-efficiency thin walls. Multi-vent All-Around Cooling maintains steady temperature on all shelves. Gentle matte black stainless finish.',
+      'Spacious 680L capacity with SpaceMax™ high-efficiency thin walls. Multi-vent All-Around Cooling maintains steady temperature on all shelves. Gentle matte black stainless finish.',
     specs: [
       '680 Litres Net Storage Capacity',
       'Digital Inverter (7-Speed Auto Adjustment)',
@@ -72,7 +72,7 @@ export const SMARTCHOICE_PRODUCTS: SmartChoiceProduct[] = [
   {
     id: 3,
     sku: 'SCLK-WM-LG09',
-    name: 'LG AI DDâ„¢ 9.0kg Front Load Steam Inverter Washing Machine',
+    name: 'LG AI DD™ 9.0kg Front Load Steam Inverter Washing Machine',
     brand: 'LG',
     category: 'Washing Machines',
     price: 268000,
@@ -89,9 +89,9 @@ export const SMARTCHOICE_PRODUCTS: SmartChoiceProduct[] = [
       'AI Direct Drive detects fabric weight and softness to choose optimal wash motions automatically. LG Steam Allergy Care removes 99.9% of dust mites and allergens.',
     specs: [
       '9.0kg Capacity / 1400 RPM High Spin Speed',
-      'AI DDâ„¢ 18% Enhanced Fabric Protection',
-      'Steamâ„¢ Allergy Care Hygiene Wash',
-      'TurboWashâ„¢ 39-Minute Quick Cleaning Cycle',
+      'AI DD™ 18% Enhanced Fabric Protection',
+      'Steam™ Allergy Care Hygiene Wash',
+      'TurboWash™ 39-Minute Quick Cleaning Cycle',
     ],
   },
   {
@@ -111,10 +111,10 @@ export const SMARTCHOICE_PRODUCTS: SmartChoiceProduct[] = [
     inverter: false,
     warranty: '3 Years Authorized Agent Warranty',
     description:
-      'Powered by Cognitive Processor XRâ„¢. Self-illuminating OLED pixels provide pure blacks and vibrant colors. Acoustic Surface Audio+ vibrates the glass screen for theater-grade direct sound.',
+      'Powered by Cognitive Processor XR™. Self-illuminating OLED pixels provide pure blacks and vibrant colors. Acoustic Surface Audio+ vibrates the glass screen for theater-grade direct sound.',
     specs: [
       '65-Inch 4K OLED Display (3840 x 2160)',
-      'Cognitive Processor XRâ„¢ Picture & Sound Engine',
+      'Cognitive Processor XR™ Picture & Sound Engine',
       'Acoustic Surface Audio+ Direct Sound',
       'Google TV with Voice Search & HDMI 2.1 120Hz',
     ],
@@ -161,10 +161,10 @@ export const SMARTCHOICE_PRODUCTS: SmartChoiceProduct[] = [
     inverter: true,
     warranty: '10 Years Inverter Compressor Warranty',
     description:
-      'PrimeFresh -3Â°C soft freezes meat and fish lightly, preserving nutrients and flavor without needing tedious defrosting. ECONAVI sensors automatically optimize power use based on room lighting and temperature.',
+      'PrimeFresh -3°C soft freezes meat and fish lightly, preserving nutrients and flavor without needing tedious defrosting. ECONAVI sensors automatically optimize power use based on room lighting and temperature.',
     specs: [
       '380 Litres Net Capacity with Ergonomic Bottom Freezer',
-      'PrimeFresh -3Â°C Soft Freezing Technology',
+      'PrimeFresh -3°C Soft Freezing Technology',
       'Ag Clean Antibacterial Silver Ion 99.9% Deodorizer',
       'ECONAVI Multi-Sensor Intelligent Energy Saving',
     ],
@@ -172,7 +172,7 @@ export const SMARTCHOICE_PRODUCTS: SmartChoiceProduct[] = [
   {
     id: 7,
     sku: 'SCLK-WM-SAM85',
-    name: 'Samsung EcoBubbleâ„¢ 8.5kg Front Load Inverter Washer',
+    name: 'Samsung EcoBubble™ 8.5kg Front Load Inverter Washer',
     brand: 'Samsung',
     category: 'Washing Machines',
     price: 238000,
@@ -186,10 +186,10 @@ export const SMARTCHOICE_PRODUCTS: SmartChoiceProduct[] = [
     inverter: true,
     warranty: '20 Years Digital Inverter Motor Warranty',
     description:
-      'EcoBubbleâ„¢ froths detergent into micro-bubbles that penetrate fabrics quickly for deeper stain removal at lower temperatures, saving electricity and protecting delicate fabrics.',
+      'EcoBubble™ froths detergent into micro-bubbles that penetrate fabrics quickly for deeper stain removal at lower temperatures, saving electricity and protecting delicate fabrics.',
     specs: [
       '8.5kg Capacity / 1400 RPM Spin',
-      'EcoBubbleâ„¢ Power Wash Technology',
+      'EcoBubble™ Power Wash Technology',
       'Hygiene Steam Deep Sanitization Cycle',
       'Drum Clean+ 99.9% Bacteria Elimination',
     ],
@@ -238,14 +238,14 @@ export const SMARTCHOICE_OFFERS = [
   },
   {
     id: 102,
-    title: 'Samsung SpaceMaxâ„¢ 680L Side-by-Side Refrigerator',
+    title: 'Samsung SpaceMax™ 680L Side-by-Side Refrigerator',
     category: 'Refrigerators',
     price: 445000,
     originalPrice: 495000,
     image: '/appliances/luxury-fridge.jpg',
     specs: [
       '20-Year Manufacturer Warranty on Digital Inverter Motor',
-      'SpaceMaxâ„¢ technology with thinner high-efficiency walls',
+      'SpaceMax™ technology with thinner high-efficiency walls',
       'All-Around Cooling multi-vent steady airflow',
       'Deodorizing active carbon filter with odor elimination',
     ],
@@ -256,7 +256,7 @@ export const SMARTCHOICE_TESTIMONIALS = [
   {
     id: 1,
     name: 'Dilshan Perera',
-    role: 'Verified Customer â€” Colombo 05',
+    role: 'Verified Customer — Colombo 05',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
     quote:
       'Installed two LG Dual Inverter ACs through Smart Choice LK for our apartment in Colombo. The installation team was certified and used genuine copper piping with vacuum pumps. Our monthly electricity bill dropped by over 40% even running every night!',
@@ -264,7 +264,7 @@ export const SMARTCHOICE_TESTIMONIALS = [
   {
     id: 2,
     name: 'Nimesha Fernando',
-    role: 'Verified Customer â€” Kandy',
+    role: 'Verified Customer — Kandy',
     image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
     quote:
       'Purchased our Samsung 680L French Door Refrigerator from Smart Choice LK. Delivery to Kandy was super safe and right on schedule. The team helped unbox, level, and verified the official agent 20-year warranty card on the spot. Highly recommended!',

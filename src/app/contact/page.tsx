@@ -1,373 +1,260 @@
 ﻿'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
+import { AnimatePresence, motion } from 'framer-motion';
+import { MapPin, Phone, Mail, Clock, ArrowUpRight, ChevronDown, Send } from 'lucide-react';
 import SiteNavbar from '@/components/SiteNavbar';
 import SiteFooter from '@/components/SiteFooter';
-import TrustRibbon from '@/components/TrustRibbon';
+import PageHeader from '@/components/PageHeader';
+import Reveal from '@/components/Reveal';
+import { TiltCard, BorderBeam, Magnetic } from '@/components/fx';
+import { WhatsAppIcon } from '@/components/FloatingActions';
+import { FacebookIcon } from '@/components/SiteFooter';
 import { useStore } from '@/context/StoreContext';
+import { SITE, whatsappLink } from '@/lib/site';
+
+const TOPICS = ['Price / buying advice', 'Delivery & installation', 'Warranty or repair help', 'Bulk / business order', 'Something else'];
+
+const FAQS = [
+  {
+    q: 'Do you deliver outside Seeduwa?',
+    a: 'Yes — we deliver across Sri Lanka. Send us your town on WhatsApp and we’ll confirm the delivery date and any charges before you pay.',
+  },
+  {
+    q: 'Can you install the AC for me?',
+    a: 'Yes. Our team can install ACs and set up large appliances at your home. Installation costs depend on the unit and the piping length needed, so we’ll quote you first.',
+  },
+  {
+    q: 'How does the warranty work?',
+    a: 'Products come with the manufacturer’s warranty. Keep your bill and warranty card; if anything goes wrong, message us and we’ll help you get it serviced.',
+  },
+  {
+    q: 'What payment methods do you accept?',
+    a: 'Cash, bank transfer and card payments, with installment plans on selected cards. Ask us which options apply to the product you want.',
+  },
+  {
+    q: 'Can I see the product before buying?',
+    a: `Of course — visit the shop at ${SITE.address}. We’re ${SITE.hours.toLowerCase()}. Call ahead if you want us to keep a specific model ready.`,
+  },
+];
+
+const field =
+  'w-full rounded-2xl bg-white px-4 py-3.5 text-[15px] text-ink ring-1 ring-slate-200 transition-shadow placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-electric';
 
 export default function ContactPage() {
   const { showToast } = useStore();
+  const [form, setForm] = useState({ name: '', phone: '', topic: TOPICS[0], town: '', message: '' });
+  const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
+  const [open, setOpen] = useState<number | null>(0);
 
-  const [formState, setFormState] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    serviceType: 'Purchase Inquiry & Quote',
-    district: 'Colombo',
-    message: '',
-  });
+  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+    setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const [submitted, setSubmitted] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formState.name || !formState.phone) {
-      showToast('Please provide your name and phone number', 'âš ï¸');
-      return;
-    }
-    setSubmitted(true);
-    showToast('Your inquiry was sent to Smart Choice LK engineering team!', 'âœ…');
+    const errs: typeof errors = {};
+    if (!form.name.trim()) errs.name = 'Please enter your name.';
+    if (!/^[0-9+\s-]{9,15}$/.test(form.phone.trim())) errs.phone = 'Please enter a valid phone number, e.g. 077 123 4567.';
+    setErrors(errs);
+    if (Object.keys(errs).length) return;
+    const msg = `Hello ${SITE.name}!\nName: ${form.name}\nPhone: ${form.phone}\nTopic: ${form.topic}${form.town ? `\nTown: ${form.town}` : ''}${
+      form.message ? `\n\n${form.message}` : ''
+    }`;
+    window.open(whatsappLink(msg), '_blank');
+    showToast('Opening WhatsApp with your message…', '💬');
   };
 
-  const faqs = [
-    {
-      q: 'How fast is islandwide delivery across Sri Lanka?',
-      a: 'We deliver within 24 to 48 hours to Colombo, Gampaha, and Kalutara with same-day delivery available for orders confirmed before 11:00 AM. For all other districts (Kandy, Galle, Kurunegala, Jaffna, etc.), insured transit takes 2 to 3 business days.',
-    },
-    {
-      q: 'What is included in the Air Conditioner installation package?',
-      a: 'Our standard certified AC installation package includes: 3 meters of genuine high-grade copper refrigerant piping, outdoor wall bracket, vibration damper pads, 100% nitrogen pressure testing for leak prevention, and dual-stage vacuum pump moisture degassing. Additional piping is charged per meter at standard transparent rates.',
-    },
-    {
-      q: 'How do I claim the 10 to 20-year inverter compressor warranty?',
-      a: 'Every appliance from Smart Choice LK comes with an original authorized agent warranty card stamped upon delivery. For any technical service, you can simply call our hotline or the manufacturer authorized service center directly using the warranty booklet.',
-    },
-    {
-      q: 'What payment methods do you accept?',
-      a: 'We accept Cash on Delivery (COD) for selected areas, Credit / Debit Cards (Visa, Mastercard, AMEX), 0% installment plans, direct bank transfers, and 3-month interest-free installment apps (Koko and Mintpay).',
-    },
+  const cards = [
+    { icon: Phone, label: 'Call us', value: SITE.phoneDisplay, href: `tel:${SITE.phoneTel}` },
+    { icon: Mail, label: 'Email', value: SITE.email, href: `mailto:${SITE.email}` },
+    { icon: MapPin, label: 'Visit', value: SITE.address, href: SITE.mapsUrl },
+    { icon: Clock, label: 'Hours', value: SITE.hours },
   ];
 
   return (
-    <div className="antigravity-layout">
+    <div className="bg-mist font-sans text-ink antialiased">
       <SiteNavbar />
-
-      {/* Breadcrumbs */}
-      <div className="breadcrumbs-bar">
-        <div className="container">
-          <ul className="breadcrumbs-list">
-            <li>
-              <Link href="/">Home</Link>
-            </li>
-            <li className="breadcrumbs-separator">/</li>
-            <li className="breadcrumbs-current">Contact & Showroom</li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Main Contact Layout */}
-      <main className="contact-page">
-        <div className="container">
-          <div className="section-title-wrap" style={{ textAlign: 'left', marginBottom: '36px' }}>
-            <span
-              style={{
-                color: 'var(--color-primary)',
-                fontWeight: 700,
-                fontSize: '0.8125rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-              }}
+      <PageHeader
+        eyebrow="Contact"
+        title={
+          <>
+            Let’s find the <span className="sc-text-gradient">right one</span> for your home.
+          </>
+        }
+        sub="Questions about a product, delivery or installation? Message us — a real person replies."
+        crumbs={[{ label: 'Contact' }]}
+      >
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Magnetic>
+            <a
+              href={whatsappLink()}
+              target="_blank"
+              rel="noreferrer"
+              className="sc-shimmer inline-flex items-center gap-2 rounded-full bg-[#25D366] px-6 py-4 font-bold text-white"
             >
-              Get In Touch With Our Specialists
-            </span>
-            <h1 className="section-title">Showroom & Customer Support</h1>
-            <p className="section-subtitle" style={{ margin: 0 }}>
-              Need advice on inverter AC room BTU sizing, refrigerator dimensions, or booking certified technician installation? We are here to help.
-            </p>
-          </div>
-
-          <div className="contact-split">
-            {/* Left: Contact Info Stack */}
-            <div className="contact-cards-stack">
-              {/* Showroom Location Card */}
-              <div className="contact-card-box">
-                <h3 className="contact-card-title">
-                  <span>ðŸ“</span> Colombo Flagship Showroom
-                </h3>
-                <p style={{ color: '#475569', fontSize: '0.9375rem', lineHeight: '1.6', marginBottom: '16px' }}>
-                  No. 245 Galle Road, Colombo 03, Sri Lanka.
-                  <br />
-                  <span style={{ fontSize: '0.8125rem', color: '#64748b' }}>
-                    (Convenient customer parking available on premises)
-                  </span>
-                </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.875rem', color: '#334155' }}>
-                  <div>ðŸ“ž <strong>Hotline:</strong> (+94) 11 234 5678</div>
-                  <div>ðŸ“± <strong>Mobile / WhatsApp:</strong> (+94) 77 123 4567</div>
-                  <div>âœ‰ï¸ <strong>Sales & Quotes:</strong> sales@smartchoicelk.com</div>
-                  <div>ðŸ•’ <strong>Showroom Hours:</strong> Mon â€“ Sat: 9:00 AM â€“ 7:00 PM | Sun: 10:00 AM â€“ 4:00 PM</div>
-                </div>
-              </div>
-
-              {/* Direct WhatsApp Card */}
-              <div
-                style={{
-                  backgroundColor: '#f0fdf4',
-                  border: '1px solid #bbf7d0',
-                  borderRadius: '12px',
-                  padding: '24px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '16px',
-                  flexWrap: 'wrap',
-                }}
-              >
-                <div>
-                  <h4 style={{ fontWeight: 700, color: '#166534', fontSize: '1.05rem', marginBottom: '4px' }}>
-                    Instant WhatsApp Support
-                  </h4>
-                  <p style={{ color: '#14532d', fontSize: '0.8125rem', margin: 0 }}>
-                    Chat live with an appliance engineer for quick quotes and stock availability.
-                  </p>
-                </div>
-                <a
-                  href="https://wa.me/94771234567?text=Hello%20Smart%20Choice%20LK%2C%20I%20have%20an%20inquiry%20about%20appliances"
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    padding: '10px 22px',
-                    borderRadius: '50px',
-                    backgroundColor: '#25D366',
-                    color: '#ffffff',
-                    fontWeight: 700,
-                    fontSize: '0.875rem',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                  }}
-                >
-                  <span>Chat on WhatsApp</span>
-                </a>
-              </div>
-
-              {/* Islandwide Coverage Card */}
-              <div className="contact-card-box">
-                <h3 className="contact-card-title">
-                  <span>ðŸšš</span> Islandwide Technician & Delivery Coverage
-                </h3>
-                <p style={{ color: '#475569', fontSize: '0.875rem', lineHeight: '1.6', margin: 0 }}>
-                  We service and deliver across all 25 administrative districts: Western, Central, Southern, North Western, Sabaragamuwa, Eastern, Uva, North Central, and Northern Provinces.
-                </p>
-              </div>
-            </div>
-
-            {/* Right: Service & Quote Booking Form */}
-            <div className="contact-form-box">
-              <h3 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--color-dark)', marginBottom: '8px' }}>
-                Send Us an Inquiry / Book Installation
-              </h3>
-              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem', marginBottom: '24px' }}>
-                Fill out the form below and an appliance consultant will respond within 30 minutes.
-              </p>
-
-              {submitted ? (
-                <div
-                  style={{
-                    backgroundColor: '#f0fdf4',
-                    border: '1px solid #bbf7d0',
-                    borderRadius: '12px',
-                    padding: '36px 24px',
-                    textAlign: 'center',
-                  }}
-                >
-                  <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>âœ…</div>
-                  <h4 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#166534', marginBottom: '8px' }}>
-                    Inquiry Received Successfully!
-                  </h4>
-                  <p style={{ color: '#14532d', fontSize: '0.875rem', marginBottom: '20px' }}>
-                    Thank you, {formState.name}. Our Colombo showroom team will contact you at {formState.phone} shortly.
-                  </p>
-                  <button
-                    onClick={() => {
-                      setSubmitted(false);
-                      setFormState({
-                        name: '',
-                        phone: '',
-                        email: '',
-                        serviceType: 'Purchase Inquiry & Quote',
-                        district: 'Colombo',
-                        message: '',
-                      });
-                    }}
-                    style={{
-                      padding: '8px 20px',
-                      backgroundColor: 'var(--color-primary)',
-                      color: '#ffffff',
-                      borderRadius: '50px',
-                      fontWeight: 600,
-                      fontSize: '0.8125rem',
-                    }}
-                  >
-                    Submit Another Inquiry
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit}>
-                  <div className="form-group">
-                    <label className="form-label">Full Name *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Kasun Jayawardena"
-                      className="form-input"
-                      value={formState.name}
-                      onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                    />
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                    <div className="form-group">
-                      <label className="form-label">Phone / WhatsApp *</label>
-                      <input
-                        type="tel"
-                        required
-                        placeholder="e.g. +94 77 123 4567"
-                        className="form-input"
-                        value={formState.phone}
-                        onChange={(e) => setFormState({ ...formState, phone: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Email Address</label>
-                      <input
-                        type="email"
-                        placeholder="e.g. kasun@example.com"
-                        className="form-input"
-                        value={formState.email}
-                        onChange={(e) => setFormState({ ...formState, email: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                    <div className="form-group">
-                      <label className="form-label">Inquiry / Service Type</label>
-                      <select
-                        className="form-select"
-                        value={formState.serviceType}
-                        onChange={(e) => setFormState({ ...formState, serviceType: e.target.value })}
-                      >
-                        <option value="Purchase Inquiry & Quote">New Appliance Purchase & Price Quote</option>
-                        <option value="Certified AC Installation Booking">Certified AC Installation Booking</option>
-                        <option value="Inverter Sizing & Consultation">Room BTU Sizing & Consultation</option>
-                        <option value="Warranty Claim & Technical Support">Warranty Claim & Technical Support</option>
-                        <option value="Corporate / Bulk Order">Corporate / Bulk Order</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Your District</label>
-                      <select
-                        className="form-select"
-                        value={formState.district}
-                        onChange={(e) => setFormState({ ...formState, district: e.target.value })}
-                      >
-                        <option value="Colombo">Colombo</option>
-                        <option value="Gampaha">Gampaha</option>
-                        <option value="Kalutara">Kalutara</option>
-                        <option value="Kandy">Kandy</option>
-                        <option value="Galle">Galle</option>
-                        <option value="Kurunegala">Kurunegala</option>
-                        <option value="Matara">Matara</option>
-                        <option value="Other">Other District</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Your Message or Appliance Requirements</label>
-                    <textarea
-                      rows={4}
-                      placeholder="Tell us about the appliance you are interested in (e.g. 18,000 BTU Inverter AC or Side-by-side Refrigerator), room size, or delivery location."
-                      className="form-textarea"
-                      value={formState.message}
-                      onChange={(e) => setFormState({ ...formState, message: e.target.value })}
-                    />
-                  </div>
-
-                  <button type="submit" className="form-submit-btn">
-                    Submit Inquiry & Request Callback
-                  </button>
-                </form>
-              )}
-            </div>
-          </div>
-
-          {/* FAQ Accordion Section */}
-          <section style={{ marginTop: '70px' }}>
-            <div className="section-title-wrap">
-              <h2 className="section-title">Frequently Asked Questions</h2>
-              <p className="section-subtitle">
-                Clear answers regarding delivery, installation scope, and warranty verification in Sri Lanka
-              </p>
-            </div>
-
-            <div style={{ maxWidth: '820px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {faqs.map((faq, idx) => {
-                const isOpen = openFaq === idx;
-                return (
-                  <div
-                    key={idx}
-                    style={{
-                      backgroundColor: '#ffffff',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: '8px',
-                      overflow: 'hidden',
-                      boxShadow: 'var(--box-shadow-card)',
-                    }}
-                  >
-                    <button
-                      onClick={() => setOpenFaq(isOpen ? null : idx)}
-                      style={{
-                        width: '100%',
-                        padding: '18px 24px',
-                        textAlign: 'left',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        fontSize: '0.9375rem',
-                        fontWeight: 700,
-                        color: 'var(--color-dark)',
-                        cursor: 'pointer',
-                        backgroundColor: isOpen ? '#eff6ff' : '#ffffff',
-                      }}
-                    >
-                      <span>{faq.q}</span>
-                      <span style={{ fontSize: '1.2rem', color: 'var(--color-primary)' }}>
-                        {isOpen ? 'âˆ’' : '+'}
-                      </span>
-                    </button>
-                    {isOpen && (
-                      <div style={{ padding: '18px 24px', borderTop: '1px solid #f1f5f9', color: '#475569', fontSize: '0.875rem', lineHeight: '1.7' }}>
-                        {faq.a}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </section>
+              <WhatsAppIcon /> WhatsApp {SITE.phoneDisplay}
+            </a>
+          </Magnetic>
+          <a
+            href={`tel:${SITE.phoneTel}`}
+            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-6 py-4 font-bold text-white backdrop-blur-md hover:bg-white/10"
+          >
+            <Phone className="h-4 w-4" /> Call now
+          </a>
         </div>
-      </main>
+      </PageHeader>
 
-      <TrustRibbon />
+      <main className="mx-auto max-w-[1280px] px-5 py-16">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {cards.map(({ icon: Icon, label, value, href }, i) => (
+            <Reveal key={label} delay={i * 0.06}>
+              <TiltCard max={6} className="h-full rounded-[26px]">
+                {React.createElement(
+                  href ? 'a' : 'div',
+                  {
+                    href,
+                    target: href?.startsWith('http') ? '_blank' : undefined,
+                    rel: href?.startsWith('http') ? 'noreferrer' : undefined,
+                    className: 'group flex h-full flex-col rounded-[26px] bg-white p-6 ring-1 ring-slate-200/80 transition-shadow hover:shadow-xl',
+                  },
+                  <>
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl bg-ink text-white transition-colors group-hover:bg-electric">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <p className="mt-6 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{label}</p>
+                    <p className={`mt-1 break-words font-display font-semibold ${value.includes('@') ? 'text-[15px]' : 'text-lg'}`}>{value}</p>
+                    {href && <ArrowUpRight className="mt-auto h-5 w-5 self-end pt-1 text-slate-300 group-hover:text-electric" />}
+                  </>
+                )}
+              </TiltCard>
+            </Reveal>
+          ))}
+        </div>
+
+        <div className="mt-12 grid gap-6 lg:grid-cols-[1.25fr_1fr]">
+          {/* Form → WhatsApp */}
+          <Reveal>
+            <form onSubmit={submit} noValidate className="relative overflow-hidden rounded-[28px] bg-white p-6 ring-1 ring-slate-200/80 sm:p-10">
+              <BorderBeam duration={10} />
+              <h2 className="font-display text-2xl font-bold sm:text-3xl">Send us a message</h2>
+              <p className="mt-2 text-sm text-slate-500">This opens WhatsApp with your details filled in, so you can send it in one tap.</p>
+
+              <div className="mt-8 grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="name" className="mb-2 block text-sm font-semibold">
+                    Your name <span className="text-rose-500">*</span>
+                  </label>
+                  <input id="name" value={form.name} onChange={set('name')} autoComplete="name" aria-invalid={!!errors.name} aria-describedby="name-err" className={field} />
+                  {errors.name && <p id="name-err" className="mt-1.5 text-sm text-rose-600">{errors.name}</p>}
+                </div>
+                <div>
+                  <label htmlFor="phone" className="mb-2 block text-sm font-semibold">
+                    Phone <span className="text-rose-500">*</span>
+                  </label>
+                  <input id="phone" type="tel" inputMode="tel" value={form.phone} onChange={set('phone')} autoComplete="tel" aria-invalid={!!errors.phone} aria-describedby="phone-err" className={field} />
+                  {errors.phone && <p id="phone-err" className="mt-1.5 text-sm text-rose-600">{errors.phone}</p>}
+                </div>
+                <div>
+                  <label htmlFor="topic" className="mb-2 block text-sm font-semibold">Topic</label>
+                  <select id="topic" value={form.topic} onChange={set('topic')} className={`${field} cursor-pointer`}>
+                    {TOPICS.map((t) => (
+                      <option key={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="town" className="mb-2 block text-sm font-semibold">Your town</label>
+                  <input id="town" value={form.town} onChange={set('town')} autoComplete="address-level2" className={field} />
+                </div>
+                <div className="sm:col-span-2">
+                  <label htmlFor="msg" className="mb-2 block text-sm font-semibold">Message</label>
+                  <textarea id="msg" rows={4} value={form.message} onChange={set('message')} className={`${field} resize-none`} />
+                  <p className="mt-1.5 text-xs text-slate-400">e.g. which product, room size, or the model number of an appliance that needs help.</p>
+                </div>
+              </div>
+              <button type="submit" className="mt-8 inline-flex items-center gap-2 rounded-full bg-ink px-7 py-4 font-bold text-white transition-colors hover:bg-electric">
+                <Send className="h-4 w-4" /> Continue on WhatsApp
+              </button>
+            </form>
+          </Reveal>
+
+          {/* Map + Facebook */}
+          <div className="grid gap-6">
+            <Reveal delay={0.08}>
+              <div className="overflow-hidden rounded-[28px] bg-white ring-1 ring-slate-200/80">
+                <iframe
+                  title={`Map of ${SITE.address}`}
+                  src="https://www.google.com/maps?q=Raddoluwa,+Seeduwa,+Sri+Lanka&output=embed"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="h-64 w-full border-0 grayscale-[30%]"
+                />
+                <div className="flex items-center justify-between gap-4 p-5">
+                  <div>
+                    <p className="font-display font-semibold">{SITE.name}</p>
+                    <p className="text-sm text-slate-500">{SITE.address}</p>
+                  </div>
+                  <a href={SITE.mapsUrl} target="_blank" rel="noreferrer" className="shrink-0 rounded-full bg-ink px-4 py-2.5 text-sm font-bold text-white hover:bg-electric">
+                    Directions
+                  </a>
+                </div>
+              </div>
+            </Reveal>
+            <Reveal delay={0.14}>
+              <a
+                href={SITE.facebook}
+                target="_blank"
+                rel="noreferrer"
+                className="group relative flex items-center justify-between overflow-hidden rounded-[28px] bg-gradient-to-br from-[#1877F2] to-electric-700 p-6 text-white"
+              >
+                <FacebookIcon className="absolute -right-6 -top-6 h-32 w-32 text-white/10" />
+                <div className="relative">
+                  <p className="font-display text-lg font-semibold">Follow us on Facebook</p>
+                  <p className="text-sm text-white/75">New arrivals, price drops and offers</p>
+                </div>
+                <ArrowUpRight className="relative h-6 w-6 transition-transform group-hover:rotate-45" />
+              </a>
+            </Reveal>
+          </div>
+        </div>
+
+        {/* FAQ */}
+        <section className="mx-auto mt-24 max-w-3xl">
+          <h2 className="text-center font-display text-3xl font-bold sm:text-4xl">Common questions</h2>
+          <div className="mt-10 space-y-3">
+            {FAQS.map((f, i) => {
+              const isOpen = open === i;
+              return (
+                <div key={f.q} className="overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80">
+                  <button
+                    onClick={() => setOpen(isOpen ? null : i)}
+                    aria-expanded={isOpen}
+                    aria-controls={`faq-${i}`}
+                    className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left font-semibold"
+                  >
+                    {f.q}
+                    <ChevronDown className={`h-5 w-5 shrink-0 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        id={`faq-${i}`}
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                      >
+                        <p className="px-6 pb-5 text-sm leading-relaxed text-slate-600">{f.a}</p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      </main>
       <SiteFooter />
     </div>
   );
 }
-

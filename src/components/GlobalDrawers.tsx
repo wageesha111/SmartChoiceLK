@@ -89,7 +89,7 @@ export default function GlobalDrawers() {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '1.4rem' }}>ðŸ›’</span>
+                <span style={{ fontSize: '1.4rem' }}>🛒</span>
                 <div>
                   <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
                     Appliance Cart ({cartCount})
@@ -113,7 +113,7 @@ export default function GlobalDrawers() {
                   color: '#475569',
                 }}
               >
-                âœ•
+                ✕
               </button>
             </div>
 
@@ -132,7 +132,7 @@ export default function GlobalDrawers() {
                 gap: '8px',
               }}
             >
-              <span>{subtotal >= 100000 ? 'ðŸŽ‰' : 'ðŸšš'}</span>
+              <span>{subtotal >= 100000 ? '🎉' : '🚚'}</span>
               <span>
                 {subtotal >= 100000
                   ? 'Congratulations! You qualify for FREE Islandwide Safe Delivery.'
@@ -151,7 +151,7 @@ export default function GlobalDrawers() {
                   }}
                 >
                   <span style={{ fontSize: '3rem', display: 'block', marginBottom: '12px' }}>
-                    ðŸ“¦
+                    📦
                   </span>
                   <p style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '6px' }}>
                     Your cart is currently empty
@@ -279,7 +279,7 @@ export default function GlobalDrawers() {
                         }}
                         title="Remove item"
                       >
-                        ðŸ—‘ï¸
+                        🗑️
                       </button>
                     </div>
                   ))}
@@ -336,11 +336,11 @@ export default function GlobalDrawers() {
                     marginBottom: '10px',
                   }}
                 >
-                  View Full Cart & Checkout â†’
+                  View Full Cart & Checkout →
                 </Link>
 
                 <a
-                  href={`https://wa.me/94771234567?text=${encodeURIComponent(
+                  href={`https://wa.me/94766467854?text=${encodeURIComponent(
                     `Hello Smart Choice LK! I have ${cartCount} items in my cart totaling ${formatLKR(
                       subtotal
                     )}. I'd like to confirm the order.`
@@ -363,7 +363,7 @@ export default function GlobalDrawers() {
                     textDecoration: 'none',
                   }}
                 >
-                  <span>ðŸ’¬ Fast Order via WhatsApp</span>
+                  <span>💬 Fast Order via WhatsApp</span>
                 </a>
               </div>
             )}
@@ -403,7 +403,7 @@ export default function GlobalDrawers() {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '1.4rem' }}>â¤ï¸</span>
+                <span style={{ fontSize: '1.4rem' }}>❤️</span>
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
                   Saved Appliances ({wishlist.length})
                 </h3>
@@ -422,7 +422,7 @@ export default function GlobalDrawers() {
                   color: '#475569',
                 }}
               >
-                âœ•
+                ✕
               </button>
             </div>
 
@@ -436,7 +436,7 @@ export default function GlobalDrawers() {
                   }}
                 >
                   <span style={{ fontSize: '3rem', display: 'block', marginBottom: '12px' }}>
-                    ðŸ¤
+                    🤍
                   </span>
                   <p style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '6px' }}>
                     Your wishlist is currently empty
@@ -539,7 +539,7 @@ export default function GlobalDrawers() {
                           }}
                           title="Remove"
                         >
-                          âœ•
+                          ✕
                         </button>
                       </div>
                     );
@@ -556,7 +556,7 @@ export default function GlobalDrawers() {
         <div className="modal-backdrop" onClick={closeQuickView}>
           <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close-btn" onClick={closeQuickView}>
-              âœ•
+              ✕
             </button>
 
             <div className="quick-view-grid">
@@ -582,7 +582,7 @@ export default function GlobalDrawers() {
                     textTransform: 'uppercase',
                   }}
                 >
-                  {selectedQuickViewProduct.brand} â€¢ {selectedQuickViewProduct.warranty}
+                  {selectedQuickViewProduct.brand} • {selectedQuickViewProduct.warranty}
                 </span>
 
                 <h3
@@ -632,7 +632,7 @@ export default function GlobalDrawers() {
                     marginBottom: '16px',
                   }}
                 >
-                  ðŸ’³ Or 3 interest-free payments of{' '}
+                  💳 Or 3 interest-free payments of{' '}
                   <strong style={{ color: '#0f172a' }}>
                     {formatLKR(Math.round(selectedQuickViewProduct.price / 3))}
                   </strong>{' '}
@@ -711,7 +711,7 @@ export default function GlobalDrawers() {
                     textDecoration: 'underline',
                   }}
                 >
-                  View Full Technical Specs & Reviews â†’
+                  View Full Technical Specs & Reviews →
                 </Link>
               </div>
             </div>
