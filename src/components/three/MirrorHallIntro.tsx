@@ -192,6 +192,8 @@ export default function MirrorHallIntro() {
   const fadeRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLDivElement>(null);
   const skipRef = useRef<HTMLButtonElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const [active, setActive] = useState(0);
   const [reduced, setReduced] = useState(false);
@@ -339,6 +341,34 @@ export default function MirrorHallIntro() {
       /* Camera */
       const camBase = new THREE.Vector3(0, mobile ? 1.45 : 1.25, RADIUS + (mobile ? 9.5 : 12.5));
       const target = new THREE.Vector3(0, cardY * (mobile ? 0.95 : 1.02), RADIUS - 2);
+      // Fit the ring between the top title and the bottom word on any screen size:
+      // find a look-at height (and, if needed, extra distance) so the front card's
+      // label clears the title and its base clears the word below.
+      let fitY = target.y;
+      let fitZ = 0;
+      const topPt = new THREE.Vector3(0, cardY + (CH / 2) * 1.04 + 0.12 + 0.22 + 0.16, RADIUS);
+      const basePt = new THREE.Vector3(0, 0.05, RADIUS);
+      const toScreenY = (v: InstanceType<typeof THREE.Vector3>, h: number) => ((1 - v.clone().project(camera).y) / 2) * h;
+      const fit = () => {
+        const h = host.clientHeight;
+        const hostTop = host.getBoundingClientRect().top;
+        const titleB = titleRef.current ? titleRef.current.getBoundingClientRect().bottom - hostTop + 18 : 0;
+        const wordT = bottomRef.current ? bottomRef.current.getBoundingClientRect().top - hostTop - 12 : h;
+        for (let dz = 0; dz <= 12; dz += 0.5) {
+          for (let ty = 4; ty >= -1; ty -= 0.04) {
+            camera.position.set(camBase.x, camBase.y, camBase.z + dz);
+            camera.lookAt(target.x, ty, target.z);
+            camera.updateMatrixWorld();
+            const topY = toScreenY(topPt, h);
+            const baseY = toScreenY(basePt, h);
+            if (topY >= titleB && baseY <= wordT) {
+              fitY = ty;
+              fitZ = dz;
+              return;
+            }
+          }
+        }
+      };
       const resize = () => {
         const w = host.clientWidth;
         const h = host.clientHeight;
@@ -346,6 +376,7 @@ export default function MirrorHallIntro() {
         renderer.setSize(w, h, false);
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
+        fit();
       };
       resize();
       const ro = new ResizeObserver(resize);
@@ -416,9 +447,9 @@ export default function MirrorHallIntro() {
         camPos.copy(camBase);
         camPos.x += pointer.sx * 0.9;
         camPos.y += -pointer.sy * 0.35 + out * 5.5;
-        camPos.z += out * 4;
+        camPos.z += fitZ + out * 4;
         camera.position.copy(camPos);
-        camera.lookAt(target.x, target.y - out * 1.2, target.z - out * 3);
+        camera.lookAt(target.x, fitY - out * 1.2, target.z - out * 3);
 
         poolUniforms.time.value = t;
         motes.rotation.y = t * 0.015;
@@ -487,19 +518,16 @@ export default function MirrorHallIntro() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,rgba(4,6,13,0.9)_100%)]" />
 
         {/* Top title */}
-        <div className="pointer-events-none absolute inset-x-0 top-[96px] text-center text-white sm:top-[110px]">
+        <div ref={titleRef} className="pointer-events-none absolute inset-x-0 top-[92px] text-center text-white sm:top-[96px]">
           <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-white/45 sm:text-[11px]">Smart Choice LK · Seeduwa</p>
-          <h2 className="mt-3 font-display text-3xl font-light tracking-[-0.02em] text-white/95 sm:text-5xl">
+          <h2 className="mt-2 font-display text-3xl font-light tracking-[-0.02em] text-white/95 sm:text-4xl xl:text-[2.75rem]">
             Choose smart. <span className="text-white/50">Live better.</span>
           </h2>
         </div>
 
         {/* Bottom: counter, building word, dots */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-[84px] text-center text-white sm:bottom-[72px]">
-          <p className="text-xs font-semibold tabular-nums tracking-[0.3em] text-white/50">
-            {String(active + 1).padStart(2, '0')} <span className="text-white/25">/ {String(N).padStart(2, '0')}</span>
-          </p>
-          <p aria-label="Smart Choice" className="mt-2 font-display text-4xl font-light tracking-[0.18em] sm:text-6xl">
+        <div ref={bottomRef} className="pointer-events-none absolute inset-x-0 bottom-[72px] text-center text-white sm:bottom-[56px]">
+          <p aria-label="Smart Choice" className="font-display text-4xl font-light tracking-[0.18em] sm:text-6xl">
             {word.split('').map((ch, i) => {
               const letterIdx = word.slice(0, i + 1).replace(/ /g, '').length; // 1-based among letters
               const on = ch === ' ' || letterIdx <= shown;
