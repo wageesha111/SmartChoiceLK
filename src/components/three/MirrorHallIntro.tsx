@@ -27,7 +27,11 @@ const LABELS = [
 // hue offsets per card around the brand electric blue (deg)
 const HUES = [222, 214, 230, 205, 238, 218, 226, 200, 234, 210, 222];
 const N = LETTERS.length;
-const DWELL_END = 0.86; // scroll fraction spent turning the ring
+const RING_END = 0.5; // scroll fraction spent turning the ring
+const ASM_END = 0.72; // by here the cards have risen into a row spelling the name
+// The last screen-height of scroll is the hand-off: SMART and CHOICE part to the sides,
+// and the home page (pulled up underneath) opens out from the middle.
+const BG = '#050B1A'; // = tailwind `ink`, so the intro melts into the hero with no seam
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -152,6 +156,8 @@ const PoolShader = {
     textureMatrix: { value: null },
     time: { value: 0 },
     strength: { value: 1 },
+    bg: { value: null },
+    fadeOut: { value: 0 },
   },
   vertexShader: /* glsl */ `
     uniform mat4 textureMatrix;
@@ -167,6 +173,8 @@ const PoolShader = {
     uniform sampler2D tDiffuse;
     uniform float time;
     uniform float strength;
+    uniform vec3 bg;
+    uniform float fadeOut;
     varying vec4 vUv;
     varying vec2 vPlane;
     void main() {
@@ -180,8 +188,8 @@ const PoolShader = {
       vec4 base = texture2DProj(tDiffuse, uv);
       // fade the reflection with distance from the ring
       float fade = 1.0 - smoothstep(4.0, 16.0, d);
-      gl_FragColor = vec4(base.rgb * color * fade, 1.0);
-      #include <tonemapping_fragment>
+      // sit on the page colour (not pure black) so the horizon never shows a seam
+      gl_FragColor = vec4(bg + base.rgb * color * fade * (1.0 - fadeOut), 1.0);
       #include <colorspace_fragment>
     }`,
 };
@@ -189,7 +197,7 @@ const PoolShader = {
 export default function MirrorHallIntro() {
   const sectionRef = useRef<HTMLElement>(null);
   const hostRef = useRef<HTMLDivElement>(null);
-  const fadeRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLDivElement>(null);
   const skipRef = useRef<HTMLButtonElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
@@ -230,7 +238,7 @@ export default function MirrorHallIntro() {
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, mobile ? 1.5 : 1.75));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.setClearColor('#04060d');
+      renderer.setClearColor(BG);
       const canvas = renderer.domElement;
       canvas.setAttribute('role', 'img');
       canvas.setAttribute('aria-label', 'A ring of glowing cards spelling SMART CHOICE, reflected in a dark pool');
@@ -238,7 +246,7 @@ export default function MirrorHallIntro() {
       host.appendChild(canvas);
 
       const scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2('#04060d', 0.035);
+      scene.fog = new THREE.FogExp2(BG, 0.035);
       const camera = new THREE.PerspectiveCamera(mobile ? 44 : 28, 1, 0.1, 90);
 
       /* Ring of cards */
@@ -246,10 +254,9 @@ export default function MirrorHallIntro() {
       const CW = 1.5;
       const CH = CW * (680 / 420);
       const cardY = CH / 2;
-      const ring = new THREE.Group();
-      scene.add(ring);
       const textures: InstanceType<typeof THREE.Texture>[] = [];
-      const cards: { group: InstanceType<typeof THREE.Group>; mat: InstanceType<typeof THREE.MeshBasicMaterial>; glow: InstanceType<typeof THREE.MeshBasicMaterial> }[] = [];
+      type Mat = InstanceType<typeof THREE.MeshBasicMaterial>;
+      const cards: { group: InstanceType<typeof THREE.Group>; card: Mat; glow: Mat; label: Mat }[] = [];
 
       const glowCanvas = document.createElement('canvas');
       glowCanvas.width = glowCanvas.height = 128;
@@ -284,19 +291,14 @@ export default function MirrorHallIntro() {
         const labelTex = new THREE.CanvasTexture(paintLabel(LABELS[i]));
         labelTex.colorSpace = THREE.SRGBColorSpace;
         textures.push(labelTex);
-        const label = new THREE.Mesh(
-          new THREE.PlaneGeometry(CW * 1.4, CW * 1.4 * (64 / 512)),
-          new THREE.MeshBasicMaterial({ map: labelTex, transparent: true, depthWrite: false })
-        );
+        const labelMat = new THREE.MeshBasicMaterial({ map: labelTex, transparent: true, depthWrite: false });
+        const label = new THREE.Mesh(new THREE.PlaneGeometry(CW * 1.4, CW * 1.4 * (64 / 512)), labelMat);
         label.position.y = CH / 2 + 0.22;
 
         const g = new THREE.Group();
         g.add(glow, card, label);
-        const a = (i / N) * Math.PI * 2;
-        g.position.set(Math.sin(a) * RADIUS, cardY, Math.cos(a) * RADIUS);
-        g.rotation.y = a; // face outwards
-        ring.add(g);
-        cards.push({ group: g, mat, glow: glowMat });
+        scene.add(g); // placed every frame: on the ring, then flown into the name row
+        cards.push({ group: g, card: mat, glow: glowMat, label: labelMat });
       }
 
       /* Pool */
@@ -309,13 +311,12 @@ export default function MirrorHallIntro() {
       });
       pool.rotation.x = -Math.PI / 2;
       scene.add(pool);
-      const poolUniforms = (pool.material as unknown as { uniforms: Record<string, { value: number }> }).uniforms;
+      const poolUniforms = (pool.material as unknown as { uniforms: Record<string, { value: unknown }> }).uniforms;
+      poolUniforms.bg.value = new THREE.Color(BG);
 
       // faint light ring on the water under the cards
-      const halo = new THREE.Mesh(
-        new THREE.RingGeometry(RADIUS - 0.9, RADIUS + 0.9, 96),
-        new THREE.MeshBasicMaterial({ map: glowTex, color: '#2f6bff', transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending, depthWrite: false })
-      );
+      const haloMat = new THREE.MeshBasicMaterial({ map: glowTex, color: '#2f6bff', transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending, depthWrite: false });
+      const halo = new THREE.Mesh(new THREE.RingGeometry(RADIUS - 0.9, RADIUS + 0.9, 96), haloMat);
       halo.rotation.x = -Math.PI / 2;
       halo.position.y = 0.01;
       scene.add(halo);
@@ -332,10 +333,8 @@ export default function MirrorHallIntro() {
       }
       const moteGeo = new THREE.BufferGeometry();
       moteGeo.setAttribute('position', new THREE.BufferAttribute(mp, 3));
-      const motes = new THREE.Points(
-        moteGeo,
-        new THREE.PointsMaterial({ size: 0.03, color: '#9fbaff', transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false })
-      );
+      const moteMat = new THREE.PointsMaterial({ size: 0.03, color: '#9fbaff', transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false });
+      const motes = new THREE.Points(moteGeo, moteMat);
       scene.add(motes);
 
       /* Camera */
@@ -369,6 +368,53 @@ export default function MirrorHallIntro() {
           }
         }
       };
+      // Where each card stands once the name is assembled: upright on the water at ROW_Z,
+      // so the pool keeps reflecting every card right underneath it.
+      // One row "SMART CHOICE" on wide screens, two rows "SMART / CHOICE" on narrow ones.
+      const ROW_Z = RADIUS + 0.6;
+      const HOVER = 0.14; // small gap between card base and its reflection
+      let slots: { x: number; y: number }[] = [];
+      let rowScale = 1;
+      let rowLookY = 0;
+      let spreadX = 6;
+      const layout = () => {
+        const dist = camBase.z + fitZ - ROW_Z;
+        const hh = dist * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+        const hw = hh * camera.aspect;
+        const gx = CW * 1.08;
+        const gy = CH * 1.08;
+        const availW = hw * 2 * 0.88;
+        const availH = hh * 2 * 0.34;
+        const s1 = Math.min(availW / ((N - 1 + 0.6) * gx + CW), availH / CH);
+        const s2 = Math.min(availW / (5 * gx + CW), availH / (gy + CH));
+        const two = s2 > s1 * 1.25;
+        rowScale = Math.min(two ? s2 : s1, 1.1);
+        const baseY = (CH / 2) * rowScale + HOVER;
+        // aim the camera so the waterline under the row sits ~60% down the screen,
+        // leaving room for the reflections below it
+        const water = new THREE.Vector3(0, 0, ROW_Z);
+        spreadX = hw * 1.15;
+        rowLookY = fitY;
+        for (let ty = fitY; ty >= -4; ty -= 0.02) {
+          camera.position.set(camBase.x, camBase.y, camBase.z + fitZ);
+          camera.lookAt(target.x, ty, target.z);
+          camera.updateMatrixWorld();
+          if ((1 - water.clone().project(camera).y) / 2 <= 0.6) {
+            rowLookY = ty;
+            break;
+          }
+        }
+        slots = LETTERS.map((_, i) => {
+          if (!two) {
+            const k = i + (i >= 5 ? 0.6 : 0);
+            return { x: (k - (N - 1 + 0.6) / 2) * gx * rowScale, y: baseY };
+          }
+          const top = i < 5;
+          const c = top ? i : i - 5;
+          const cnt = top ? 5 : 6;
+          return { x: (c - (cnt - 1) / 2) * gx * rowScale, y: baseY + (top ? gy * rowScale : 0) };
+        });
+      };
       const resize = () => {
         const w = host.clientWidth;
         const h = host.clientHeight;
@@ -377,6 +423,7 @@ export default function MirrorHallIntro() {
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
         fit();
+        layout();
       };
       resize();
       const ro = new ResizeObserver(resize);
@@ -391,10 +438,12 @@ export default function MirrorHallIntro() {
 
       /* Scroll */
       let progress = 0;
+      let outStart = 0.82; // progress where the last screen-height (the hand-off) begins
       const readProgress = () => {
         const r = section.getBoundingClientRect();
         const total = r.height - window.innerHeight;
         progress = total > 0 ? clamp(-r.top / total) : 0;
+        if (total > 0) outStart = 1 - window.innerHeight / total;
       };
       readProgress();
       window.addEventListener('scroll', readProgress, { passive: true });
@@ -409,20 +458,26 @@ export default function MirrorHallIntro() {
       let raf = 0;
       const step = (Math.PI * 2) / N;
       const camPos = new THREE.Vector3();
+      const ringPos = new THREE.Vector3();
+      const rowPos = new THREE.Vector3();
+      const ringQ = new THREE.Quaternion();
+      const euler = new THREE.Euler();
+      const partQ = new THREE.Quaternion();
+      const STAG = 0.05; // per-card delay while assembling
 
       const frame = () => {
         timer.update();
         const t = timer.getElapsed();
         const p = isReduced ? 0 : progress;
 
-        // card index follows scroll with a gentle "settle" on each card
-        const raw = clamp(p / DWELL_END) * (N - 1);
+        // 1) ring turns with scroll, settling on each card
+        const raw = clamp(p / RING_END) * (N - 1);
         const base = Math.floor(raw);
         const frac = raw - base;
         const settled = base + easeInOut(clamp((frac - 0.2) / 0.6));
         const targetRot = -settled * step;
         rot += (targetRot - rot) * 0.08;
-        ring.rotation.y = rot + (isReduced ? 0 : Math.sin(t * 0.3) * 0.01);
+        const ringRot = rot + (isReduced ? 0 : Math.sin(t * 0.3) * 0.01);
 
         const idx = Math.round(clamp(-rot / step, 0, N - 1));
         if (idx !== lastActive) {
@@ -430,38 +485,93 @@ export default function MirrorHallIntro() {
           setActive(idx);
         }
 
-        // emphasise the card facing the camera
-        cards.forEach((c, i) => {
-          const a = i * step + rot;
-          const facing = Math.cos(a); // 1 = front
-          const k = clamp((facing - 0.55) / 0.45);
-          c.glow.opacity = Math.max(0, 0.03 + k * 0.6 + Math.sin(t * 1.5 + i) * 0.03 * k);
-          c.group.position.y = cardY + k * 0.12 + Math.sin(t * 0.9 + i * 0.8) * 0.03;
-          c.group.scale.setScalar(0.94 + k * 0.1);
-        });
+        // 2) cards rise off the pool and line up as the name
+        const asm = isReduced ? 0 : clamp((p - RING_END) / (ASM_END - RING_END));
+        // 3) hand-off: the two words part and the home page opens from the middle
+        const o = isReduced ? 0 : clamp((p - outStart) / (1 - outStart));
 
-        // outro: rise + pull back, then fade into the hero
-        const out = isReduced ? 0 : easeInOut(clamp((p - DWELL_END) / (1 - DWELL_END)));
         pointer.sx += (pointer.x - pointer.sx) * 0.05;
         pointer.sy += (pointer.y - pointer.sy) * 0.05;
+        const pw = 1 - asm * 0.7;
         camPos.copy(camBase);
-        camPos.x += pointer.sx * 0.9;
-        camPos.y += -pointer.sy * 0.35 + out * 5.5;
-        camPos.z += fitZ + out * 4;
+        camPos.x += pointer.sx * 0.9 * pw;
+        camPos.y += -pointer.sy * 0.35 * pw;
+        camPos.z += fitZ + o * 1.2;
         camera.position.copy(camPos);
-        camera.lookAt(target.x, fitY - out * 1.2, target.z - out * 3);
+        const lookY = fitY + (rowLookY - fitY) * easeInOut(asm);
+        camera.lookAt(target.x, lookY, target.z);
+
+        cards.forEach((c, i) => {
+          const a = i * step + ringRot;
+          const k = clamp((Math.cos(a) - 0.55) / 0.45); // 1 = facing camera
+          ringPos.set(Math.sin(a) * RADIUS, cardY + k * 0.12 + Math.sin(t * 0.9 + i * 0.8) * 0.03, Math.cos(a) * RADIUS);
+          euler.set(0, a, 0);
+          ringQ.setFromEuler(euler);
+
+          const e = easeInOut(clamp((asm - i * STAG) / (1 - (N - 1) * STAG)));
+          const sl = slots[i] ?? { x: 0, y: 0 };
+          // parting: SMART slides left, CHOICE right; the letters nearest the gap go first
+          const side = i < 5 ? -1 : 1;
+          const fromGap = i < 5 ? 4 - i : i - 5;
+          const sp = easeInOut(clamp((o - fromGap * 0.035) / 0.6));
+          const fade = 1 - clamp((sp - 0.3) / 0.55);
+
+          rowPos.set(sl.x + side * sp * spreadX, sl.y + Math.sin(t * 1.2 + i * 0.6) * 0.015 * e, ROW_Z + sp * 0.8);
+          euler.set(0, -side * sp * 0.75, 0); // swing to face the opening
+          partQ.setFromEuler(euler);
+
+          c.group.position.lerpVectors(ringPos, rowPos, e);
+          c.group.position.y += Math.sin(Math.PI * e) * 1.8; // lift up off the water on the way
+          c.group.quaternion.copy(ringQ).slerp(partQ, e); // upright, facing the viewer
+          const rs = 0.94 + k * 0.1;
+          c.group.scale.setScalar((rs + (rowScale - rs) * e) * (1 - sp * 0.25));
+
+          const ringGlow = Math.max(0, 0.03 + k * 0.6 + Math.sin(t * 1.5 + i) * 0.03 * k);
+          c.glow.opacity = (ringGlow * (1 - e) + e * (0.2 + Math.sin(t * 1.5 + i) * 0.04)) * fade;
+          c.card.opacity = fade;
+          c.label.opacity = (1 - e) * fade;
+        });
 
         poolUniforms.time.value = t;
+        poolUniforms.fadeOut.value = clamp(o * 1.4) * 0.6;
+        haloMat.opacity = 0.12 * (1 - asm);
+        moteMat.opacity = 0.6 * (1 - o * 0.7);
         motes.rotation.y = t * 0.015;
         renderer.render(scene, camera);
 
+        // the HTML word hands over to the 3D row; the title clears for the hero
+        if (bottomRef.current) bottomRef.current.style.opacity = String(1 - clamp(asm / 0.35));
+        if (titleRef.current) titleRef.current.style.opacity = String(1 - clamp(o / 0.35));
         if (hintRef.current) hintRef.current.style.opacity = String(1 - clamp(p / 0.05));
         if (skipRef.current) {
-          const o = 1 - clamp((p - 0.85) / 0.08);
-          skipRef.current.style.opacity = String(o);
-          skipRef.current.style.pointerEvents = o < 0.1 ? 'none' : 'auto';
+          const so = 1 - clamp((p - (outStart - 0.06)) / 0.06);
+          skipRef.current.style.opacity = String(so);
+          skipRef.current.style.pointerEvents = so < 0.1 ? 'none' : 'auto';
         }
-        if (fadeRef.current) fadeRef.current.style.opacity = String(clamp((p - 0.92) / 0.08));
+
+        // Opening in the middle: a soft circular hole in the intro grows to reveal the hero,
+        // which is held in place underneath and pops from 90% to full size.
+        const stage = stageRef.current;
+        const hero = section.nextElementSibling as HTMLElement | null;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        const r = Math.pow(clamp((o - 0.06) / 0.94), 1.5) * Math.hypot(w, h) * 0.56;
+        if (stage) {
+          const soft = Math.min(140, r);
+          const m = r < 1 ? '' : `radial-gradient(circle at 50% 50%, transparent ${r}px, #000 ${r + soft}px)`;
+          stage.style.maskImage = m;
+          stage.style.setProperty('-webkit-mask-image', m);
+        }
+        if (hero) {
+          if (o > 0 && o < 1) {
+            const heroTop = section.getBoundingClientRect().bottom - h; // where it would sit unpinned
+            const s = 0.9 + 0.1 * (1 - Math.pow(1 - clamp(o / 0.8), 3));
+            hero.style.transformOrigin = `50% ${h / 2}px`;
+            hero.style.transform = `translateY(${-heroTop}px) scale(${s})`;
+          } else {
+            hero.style.transform = '';
+          }
+        }
       };
 
       const loop = () => {
@@ -509,13 +619,13 @@ export default function MirrorHallIntro() {
     <section
       ref={sectionRef}
       aria-label="Smart Choice intro"
-      className="relative -mt-[76px] h-[520vh] bg-[#04060d] motion-reduce:h-screen"
+      className="relative z-10 -mt-[76px] h-[620vh] motion-reduce:h-screen"
     >
-      <div className="sticky top-0 h-screen overflow-hidden">
+      <div ref={stageRef} className="sc-noise sticky top-0 h-screen overflow-hidden bg-ink">
         <div ref={hostRef} className={`absolute inset-0 transition-opacity duration-1000 ${ready ? 'opacity-100' : 'opacity-0'}`} />
 
         {/* Edge vignette */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,rgba(4,6,13,0.9)_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,rgba(5,11,26,0.9)_100%)]" />
 
         {/* Top title */}
         <div ref={titleRef} className="pointer-events-none absolute inset-x-0 top-[92px] text-center text-white sm:top-[96px]">
@@ -562,8 +672,6 @@ export default function MirrorHallIntro() {
           Skip intro <ChevronDown className="h-3.5 w-3.5" />
         </button>
 
-        {/* Final fade into the hero */}
-        <div ref={fadeRef} className="pointer-events-none absolute inset-0 bg-ink opacity-0" />
       </div>
     </section>
   );
