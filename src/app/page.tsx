@@ -31,7 +31,7 @@ import dynamic from 'next/dynamic';
 import { Magnetic, NumberTicker, BorderBeam, Spotlight, TiltCard, Parallax, ScrubText } from '@/components/fx';
 
 const HeroScene = dynamic(() => import('@/components/three/HeroScene'), { ssr: false });
-import TvIntro from '@/components/three/TvIntro';
+import MirrorHallIntro from '@/components/three/MirrorHallIntro';
 import { useStore } from '@/context/StoreContext';
 import { ALL_PRODUCTS } from '@/data/products';
 import { SMARTCHOICE_OFFERS, SMARTCHOICE_BRANDS, SMARTCHOICE_BLOGS } from '@/data/smartchoice-data';
@@ -104,8 +104,8 @@ export default function SmartChoiceHomePage() {
     <div className="bg-white font-sans text-ink antialiased">
       <SiteNavbar />
 
-      {/* ───────────────── INTRO: curved TV → dive in ───────────────── */}
-      <TvIntro />
+      {/* ───────────────── INTRO: Mirror Hall card ring ───────────────── */}
+      <MirrorHallIntro />
 
       {/* ───────────────── HERO ───────────────── */}
       <section id="hero" className="sc-noise relative overflow-hidden bg-ink pb-10 pt-[76px] text-white">
