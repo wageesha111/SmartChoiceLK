@@ -31,6 +31,7 @@ import dynamic from 'next/dynamic';
 import { Magnetic, NumberTicker, BorderBeam, Spotlight, TiltCard, Parallax, ScrubText } from '@/components/fx';
 
 const HeroScene = dynamic(() => import('@/components/three/HeroScene'), { ssr: false });
+import TvIntro from '@/components/three/TvIntro';
 import { useStore } from '@/context/StoreContext';
 import { ALL_PRODUCTS } from '@/data/products';
 import { SMARTCHOICE_OFFERS, SMARTCHOICE_BRANDS, SMARTCHOICE_BLOGS } from '@/data/smartchoice-data';
@@ -103,8 +104,11 @@ export default function SmartChoiceHomePage() {
     <div className="bg-white font-sans text-ink antialiased">
       <SiteNavbar />
 
+      {/* ───────────────── INTRO: curved TV → dive in ───────────────── */}
+      <TvIntro />
+
       {/* ───────────────── HERO ───────────────── */}
-      <section className="sc-noise relative -mt-[76px] overflow-hidden bg-ink pb-10 pt-[76px] text-white">
+      <section id="hero" className="sc-noise relative overflow-hidden bg-ink pb-10 pt-[76px] text-white">
         {/* Ambient light */}
         <div className="pointer-events-none absolute inset-0">
           <div className="sc-grid-bg absolute inset-0" />
@@ -121,7 +125,8 @@ export default function SmartChoiceHomePage() {
               target="_blank"
               rel="noreferrer"
               initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
               className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.06] py-1.5 pl-1.5 pr-4 text-[13px] text-white/75 backdrop-blur-md transition-colors hover:border-white/25"
             >
               <span className="flex items-center gap-1 rounded-full bg-electric px-2.5 py-1 text-[11px] font-bold text-white">
@@ -133,7 +138,8 @@ export default function SmartChoiceHomePage() {
 
             <motion.h1
               initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
               className="font-display text-[2.9rem] font-extrabold leading-[0.98] tracking-[-0.035em] sm:text-7xl xl:text-[5.4rem]"
             >
@@ -144,7 +150,8 @@ export default function SmartChoiceHomePage() {
 
             <motion.p
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.8, delay: 0.1 }}
               className="mt-6 max-w-xl text-base leading-relaxed text-white/60 sm:text-lg"
             >
@@ -154,7 +161,8 @@ export default function SmartChoiceHomePage() {
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="mt-9 flex flex-wrap items-center gap-3"
             >
@@ -183,7 +191,8 @@ export default function SmartChoiceHomePage() {
             {/* Category chips */}
             <motion.div
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
               transition={{ delay: 0.4 }}
               className="sc-no-scrollbar -mx-5 mt-12 flex gap-2 overflow-x-auto px-5 lg:mx-0 lg:px-0"
             >
