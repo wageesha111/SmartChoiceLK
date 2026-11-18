@@ -12,6 +12,7 @@ const config: Config = {
       fontFamily: {
         display: ["var(--font-display)", "system-ui", "sans-serif"],
         sans: ["var(--font-body)", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "Georgia", "serif"],
       },
       colors: {
         ink: {
@@ -33,6 +34,7 @@ const config: Config = {
         },
         glow: "#38BDF8",
         mist: "#F3F5FA",
+        warm: { stone: "#F4F0EA", sand: "#EBE5DC", linen: "#FBF9F6" },
         border: "hsl(var(--border, 214.3 31.8% 91.4%))",
         input: "hsl(var(--input, 214.3 31.8% 91.4%))",
         ring: "hsl(var(--ring, 222.2 84% 4.9%))",

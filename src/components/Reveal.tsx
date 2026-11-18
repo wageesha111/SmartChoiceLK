@@ -33,6 +33,7 @@ export function SectionHeading({
   sub,
   align = 'left',
   dark = false,
+  serif = false,
   action,
 }: {
   eyebrow: string;
@@ -40,6 +41,8 @@ export function SectionHeading({
   sub?: string;
   align?: 'left' | 'center';
   dark?: boolean;
+  /** warm-stone sections: Fraunces heading */
+  serif?: boolean;
   action?: React.ReactNode;
 }) {
   return (
@@ -58,7 +61,7 @@ export function SectionHeading({
           {eyebrow}
         </p>
         <h2
-          className={`font-display text-[2rem] font-bold leading-[1.08] tracking-tight sm:text-5xl ${
+          className={`${serif ? 'font-serif font-medium tracking-[-0.01em]' : 'font-display font-bold tracking-tight'} text-[2rem] leading-[1.08] sm:text-5xl ${
             dark ? 'text-white' : 'text-ink'
           }`}
         >

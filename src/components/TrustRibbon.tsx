@@ -3,7 +3,7 @@
 import React from 'react';
 import { Truck, ShieldCheck, Wrench, CreditCard } from 'lucide-react';
 
-const ITEMS = [
+export const TRUST_ITEMS = [
   { icon: Truck, title: 'Islandwide delivery', desc: 'Safe delivery to all 25 districts' },
   { icon: ShieldCheck, title: 'Genuine warranty', desc: 'Original products, brand-backed' },
   { icon: Wrench, title: 'Expert installation', desc: 'Neat setup by trained technicians' },
@@ -15,7 +15,7 @@ export default function TrustRibbon() {
     <section className="relative z-10 bg-white">
       <div className="mx-auto max-w-[1280px] px-5">
         <div className="grid grid-cols-2 divide-slate-200/80 border-b border-slate-200/80 lg:grid-cols-4 lg:divide-x">
-          {ITEMS.map(({ icon: Icon, title, desc }) => (
+          {TRUST_ITEMS.map(({ icon: Icon, title, desc }) => (
             <div key={title} className="flex items-center gap-4 px-2 py-6 lg:px-6">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-electric-50 text-electric">
                 <Icon className="h-5 w-5" strokeWidth={2} />

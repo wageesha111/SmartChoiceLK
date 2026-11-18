@@ -18,15 +18,17 @@ const CAT_LABEL: Record<string, string> = {
   'small-appliances': 'Home Comfort',
 };
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({ product, tone = 'default' }: { product: Product; tone?: 'default' | 'stone' }) {
   const { addToCart, wishlist, toggleWishlist, openQuickView, formatLKR } = useStore();
   const wished = wishlist.includes(product.id);
+  const stone = tone === 'stone';
+  const benefit = product.badge ?? product.features?.[0];
 
   return (
     <TiltCard max={6} glare={false} scale={1.015} className="h-full rounded-[26px]">
-    <article className="group relative flex h-full flex-col rounded-[26px] bg-white p-2.5 ring-1 ring-slate-200/70 transition-shadow duration-500 hover:shadow-[0_30px_60px_-30px_rgba(14,31,68,0.35)] hover:ring-electric/30">
+    <article className={`group relative flex h-full flex-col rounded-[26px] p-2.5 ring-1 transition-shadow duration-500 hover:shadow-[0_30px_60px_-30px_rgba(14,31,68,0.35)] hover:ring-electric/30 ${stone ? 'bg-warm-linen ring-[#e2dbd0]' : 'bg-white ring-slate-200/70'}`}>
       {/* Media */}
-      <div className="relative aspect-[4/3.4] overflow-hidden rounded-[20px] bg-gradient-to-br from-slate-100 to-slate-200">
+      <div className={`relative aspect-[4/3.4] overflow-hidden ${stone ? 'rounded-[22px] bg-warm-sand' : 'rounded-[20px] bg-gradient-to-br from-slate-100 to-slate-200'}`}>
         <Link href={`/products/${product.id}`} className="absolute inset-0">
           <img
             src={product.image}
@@ -93,6 +95,9 @@ export default function ProductCard({ product }: { product: Product }) {
             {product.name}
           </Link>
         </h3>
+        {stone && benefit && (
+          <span className="mt-2 line-clamp-1 self-start rounded-full bg-ink px-2.5 py-1 text-[11px] font-semibold !text-[#F4F0EA]">{benefit}</span>
+        )}
 
         <div className="mt-auto flex items-end justify-between gap-3 pt-4">
           <div>

@@ -1,9 +1,12 @@
 import React from 'react';
 import type { Metadata, Viewport } from 'next';
+import { Fraunces } from 'next/font/google';
 import './globals.css';
 import { StoreProvider } from '@/context/StoreContext';
 import GlobalDrawers from '@/components/GlobalDrawers';
 import FloatingActions from '@/components/FloatingActions';
+
+const fraunces = Fraunces({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-serif', display: 'swap' });
 
 export const metadata: Metadata = {
   title: 'Smart Choice LK — Choose Smart. Live Better. | Home Electronics, Seeduwa',
@@ -42,7 +45,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={fraunces.variable}>
       <head>
         <meta charSet="utf-8" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
