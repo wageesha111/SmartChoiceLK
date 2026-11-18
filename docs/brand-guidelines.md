@@ -25,11 +25,23 @@ Source of truth for the website's look and voice. Tokens live in `tailwind.confi
 | White | — | #FFFFFF | Base background |
 | WhatsApp | — | #25D366 | WhatsApp buttons only |
 
+### Warm stone (home page)
+The home page's light sections use a warmer set that matches the room photography:
+
+| Role | Token | Hex | Use |
+|---|---|---|---|
+| Stone | `warm-stone` | #F4F0EA | main light background |
+| Sand | `warm-sand` | #EBE5DC | alternate section background |
+| Linen | `warm-linen` | #FBF9F6 | cards and tiles on stone |
+| Ink | `ink` | #050B1A | text, dark bands, offer banners, footer |
+| Electric | `electric` | #2F6BFF | buttons, links, eyebrows only |
+
 Text contrast: body text ≥ 4.5:1 (white/60+ on Ink, slate-500+ on white). Electric is never used for body text on Ink.
 
 ## Typography
 - **Display:** Sora 600–800, tight tracking (-0.02 to -0.035em). Headlines, prices, numbers.
 - **Body:** Plus Jakarta Sans 400–700, 15–18px, line-height 1.6.
+- Light-section headings on the home page: Fraunces 400–600 (`font-serif`).
 - Eyebrows: 11px uppercase, tracking 0.2em, Electric.
 
 ## Shape & surface
@@ -40,7 +52,7 @@ Text contrast: body text ≥ 4.5:1 (white/60+ on Ink, slate-500+ on white). Elec
 ## Motion & 3D
 - 3D: one Three.js scene per page (hero), DPR capped at 1.75, paused off-screen, static fallback for reduced motion.
 - Tilt: max 8°, desktop pointer devices only.
-- Scroll: GSAP ScrollTrigger for parallax and scrubbed reveals; no scroll-jacking; at most one pinned section per page.
+- Scroll: GSAP ScrollTrigger for parallax and scrubbed reveals; no scroll-jacking; at most one pinned section per page — the home page allows two (the intro and the room hero).
 - UI motion: Motion springs (stiffness 300–400), 200–700ms, `once: true` reveals.
 - Everything respects `prefers-reduced-motion`.
 
