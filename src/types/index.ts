@@ -99,6 +99,10 @@ export interface Category {
   image: string;
   count: number;
   badge?: string;
+  /** Brands shown as chips on the category card */
+  brands?: string[];
+  /** CSS object-position for the card image */
+  focus?: string;
 }
 
 export interface CustomerInquiry {
