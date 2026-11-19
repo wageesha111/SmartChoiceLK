@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { ArrowUp } from 'lucide-react';
 import { whatsappLink } from '@/lib/site';
 
@@ -13,6 +14,7 @@ export function WhatsAppIcon({ className = 'w-5 h-5' }: { className?: string }) 
 }
 
 export default function FloatingActions() {
+  const path = usePathname();
   const [showTop, setShowTop] = useState(false);
 
   useEffect(() => {
@@ -21,6 +23,8 @@ export default function FloatingActions() {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  if (path?.startsWith('/admin')) return null;
 
   return (
     <div className="fixed bottom-5 right-5 z-[900] flex flex-col items-end gap-3">
