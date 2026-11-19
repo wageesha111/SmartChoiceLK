@@ -26,6 +26,24 @@ export interface Product {
   features?: string[];
   specs?: Record<string, string>;
   deliveryInfo?: string;
+  /** Product video (e.g. an exploded view made with Google Flow). Plays first on the product page. */
+  video?: ProductVideo;
+}
+
+export interface ProductVideoPart {
+  /** 0–1: how far through the video this part is shown */
+  at: number;
+  title: string;
+  text: string;
+}
+
+export interface ProductVideo {
+  /** e.g. /videos/lg-dualcool-12000.mp4 (put the file in public/videos/) */
+  src: string;
+  /** still image shown before the video loads, e.g. /videos/lg-dualcool-12000.jpg */
+  poster?: string;
+  /** captions for the scroll "See inside" section; defaults per category if omitted */
+  parts?: ProductVideoPart[];
 }
 
 export interface Review {
