@@ -34,7 +34,7 @@ export default function ProductCard({ product, tone = 'default' }: { product: Pr
             src={product.image}
             alt={product.name}
             loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
+            className="h-full w-full object-contain p-4 drop-shadow-[0_18px_22px_rgba(14,31,68,0.18)] transition-transform duration-700 ease-out group-hover:scale-[1.06]"
           />
         </Link>
 
@@ -85,10 +85,12 @@ export default function ProductCard({ product, tone = 'default' }: { product: Pr
           <span>
             {product.brand} · {CAT_LABEL[product.category] ?? product.category}
           </span>
-          <span className="flex items-center gap-1 normal-case tracking-normal text-slate-500">
-            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-            {product.rating}
-          </span>
+          {product.reviews > 0 && (
+            <span className="flex items-center gap-1 normal-case tracking-normal text-slate-500">
+              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+              {product.rating}
+            </span>
+          )}
         </div>
         <h3 className="line-clamp-2 font-sans text-[15px] font-semibold leading-snug tracking-normal text-ink">
           <Link href={`/products/${product.id}`} className="hover:text-electric">

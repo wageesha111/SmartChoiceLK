@@ -30,8 +30,8 @@ export const ROOM_SCENES: RoomScene[] = [
     focal: '50% 30%',
     cta: { label: 'See inverter ACs', href: '/products?category=air-conditioners' },
     hotspots: [
-      { productId: 1, specKey: 'Energy Efficiency', x: 43, y: 16 },
-      { productId: 1, specKey: 'Noise Level', x: 59, y: 18 },
+      { productId: 1, specKey: 'Cooling Capacity', x: 43, y: 16 },
+      { productId: 1, specKey: 'Compressor', x: 59, y: 18 },
     ],
   },
   {
@@ -45,8 +45,8 @@ export const ROOM_SCENES: RoomScene[] = [
     focal: '50% 55%',
     cta: { label: 'See washing machines', href: '/products?category=washing-machines' },
     hotspots: [
-      { productId: 9, specKey: 'Capacity', x: 52, y: 38 },
-      { productId: 9, specKey: 'Motor', x: 51, y: 61 },
+      { productId: 15, specKey: 'Capacity', x: 52, y: 38 },
+      { productId: 15, specKey: 'Motor', x: 51, y: 61 },
     ],
   },
   {
@@ -59,7 +59,7 @@ export const ROOM_SCENES: RoomScene[] = [
     size: [1200, 896],
     focal: '50% 45%',
     cta: { label: 'See refrigerators', href: '/products?category=refrigerators' },
-    hotspots: [{ productId: 6, specKey: 'Capacity', x: 41, y: 58 }],
+    hotspots: [{ productId: 22, specKey: 'Capacity', x: 41, y: 58 }],
   },
   {
     id: 'tv',
@@ -71,7 +71,7 @@ export const ROOM_SCENES: RoomScene[] = [
     size: [1376, 768],
     focal: '40% 45%',
     cta: { label: 'See smart TVs', href: '/products?category=televisions' },
-    hotspots: [{ productId: 13, specKey: 'Screen Size', x: 36, y: 42 }],
+    hotspots: [{ productId: 9, specKey: 'Screen Size', x: 36, y: 42 }],
   },
 ];
 

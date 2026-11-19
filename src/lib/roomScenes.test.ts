@@ -38,8 +38,8 @@ describe('resolveHotspot', () => {
     expect(resolveHotspot({ productId: 99999, specKey: 'Capacity', x: 0, y: 0 }, ALL_PRODUCTS)).toBeNull();
   });
   it('formats a real spec', () => {
-    expect(resolveHotspot({ productId: 1, specKey: 'Energy Efficiency', x: 0, y: 0 }, ALL_PRODUCTS)).toBe(
-      'Energy Efficiency: 5-Star Inverter Rating'
+    expect(resolveHotspot({ productId: 1, specKey: 'Cooling Capacity', x: 0, y: 0 }, ALL_PRODUCTS)).toBe(
+      'Cooling Capacity: 12,000 BTU/h'
     );
   });
 });

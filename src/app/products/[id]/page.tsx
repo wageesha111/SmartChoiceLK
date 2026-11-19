@@ -99,9 +99,11 @@ export default function ProductDetailPage() {
             </h1>
 
             <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
-              <span className="flex items-center gap-1 font-semibold">
-                <Star className="h-4 w-4 fill-amber-400 text-amber-400" /> {product.rating}
-              </span>
+              {product.reviews > 0 && (
+                <span className="flex items-center gap-1 font-semibold">
+                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" /> {product.rating}
+                </span>
+              )}
               {product.inStock !== false && (
                 <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> In stock

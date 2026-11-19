@@ -118,7 +118,7 @@ export default function ProductGallery({ product }: { product: Product }) {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.4 }}
                 style={{ transformOrigin: `${zoom.x}% ${zoom.y}%` }}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain p-6"
               />
             )}
           </AnimatePresence>
@@ -153,7 +153,7 @@ export default function ProductGallery({ product }: { product: Product }) {
                   active ? 'ring-electric' : 'ring-transparent opacity-60 hover:opacity-100'
                 }`}
               >
-                <img src={m.type === 'video' ? m.poster ?? photos[0] : m.src} alt="" className="h-full w-full object-cover" />
+                <img src={m.type === 'video' ? m.poster ?? photos[0] : m.src} alt="" className={`h-full w-full ${m.type === 'video' ? 'object-cover' : 'object-contain p-1'}`} />
                 {m.type === 'video' && (
                   <span className="absolute inset-0 grid place-items-center bg-ink/40">
                     <span className="grid h-8 w-8 place-items-center rounded-full bg-white/90 text-ink">
