@@ -137,7 +137,7 @@ export default function AdminDashboard() {
 
       {/* stats */}
       {rows ? (
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5 [&>*]:min-w-0">
           <StatCard icon={Package} label="Total products" value={s.total} from="#38BDF8" to="#2F6BFF" delay={0.05} />
           <StatCard icon={PackageCheck} label="Live & in stock" value={s.live} from="#34D399" to="#0D9488" delay={0.1} />
           <StatCard icon={PackageX} label="Out of stock" value={s.out} from="#FB7185" to="#E11D48" delay={0.15} />
@@ -157,7 +157,7 @@ export default function AdminDashboard() {
       )}
 
       {pending && (
-        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 [&>*]:min-w-0">
           <InboxCard
             href="/admin/messages"
             icon={MessageSquare}
@@ -180,7 +180,7 @@ export default function AdminDashboard() {
       )}
 
       {rows && (
-        <div className="grid gap-6 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-5 [&>*]:min-w-0">
           {/* categories */}
           <Panel className="lg:col-span-3" title="Products by category" icon={Tag} delay={0.3}>
             <ul className="space-y-4">
@@ -257,7 +257,7 @@ export default function AdminDashboard() {
 
           {/* recent */}
           <Panel className="lg:col-span-5" title="Recently updated" icon={Clock} delay={0.4} action={<Link href="/admin/products" className="text-sm font-bold text-electric hover:text-violet-600">See all</Link>}>
-            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 [&>*]:min-w-0">
               {s.recent.map((r, i) => {
                 const st = catStyle(r.category);
                 return (

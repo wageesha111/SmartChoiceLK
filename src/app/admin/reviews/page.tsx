@@ -109,7 +109,7 @@ export default function AdminReviewsPage() {
         </div>
       )}
 
-      <ul className="grid gap-4 md:grid-cols-2">
+      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 [&>*]:min-w-0">
         <AnimatePresence initial={false}>
           {list.map((r, i) => {
             const p = products.get(r.product_id);
