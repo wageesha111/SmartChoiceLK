@@ -5,6 +5,7 @@ import './globals.css';
 import { StoreProvider } from '@/context/StoreContext';
 import GlobalDrawers from '@/components/GlobalDrawers';
 import FloatingActions from '@/components/FloatingActions';
+import SiteAnalytics from '@/components/SiteAnalytics';
 
 const fraunces = Fraunces({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-serif', display: 'swap' });
 
@@ -69,6 +70,7 @@ export default function RootLayout({
           <GlobalDrawers />
           <FloatingActions />
         </StoreProvider>
+        <SiteAnalytics />
       </body>
     </html>
   );

@@ -22,6 +22,7 @@ import SiteFooter from '@/components/SiteFooter';
 import TrustRibbon from '@/components/TrustRibbon';
 import ProductGallery from '@/components/product/ProductGallery';
 import SeeInside from '@/components/product/SeeInside';
+import ProductReviews from '@/components/product/ProductReviews';
 import ProductCard from '@/components/ProductCard';
 import Reveal, { SectionHeading } from '@/components/Reveal';
 import { Magnetic } from '@/components/fx';
@@ -127,9 +128,12 @@ function ProductDetail({ product }: { product: Product }) {
 
             <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
               {product.reviews > 0 && (
-                <span className="flex items-center gap-1 font-semibold">
+                <a href="#reviews" className="flex items-center gap-1 font-semibold hover:text-electric">
                   <Star className="h-4 w-4 fill-amber-400 text-amber-400" /> {product.rating}
-                </span>
+                  <span className="font-normal text-slate-500">
+                    ({product.reviews} review{product.reviews === 1 ? '' : 's'})
+                  </span>
+                </a>
               )}
               {product.inStock !== false && (
                 <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
@@ -305,6 +309,8 @@ function ProductDetail({ product }: { product: Product }) {
 
       {/* Exploded view tied to scroll (only when the product has a video) */}
       <SeeInside product={product} />
+
+      <ProductReviews productId={product.id} productName={product.name} />
 
       <div className="mx-auto max-w-[1280px] px-5 pb-20">
         {related.length > 0 && (

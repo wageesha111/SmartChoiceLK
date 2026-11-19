@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { MapPin, Phone, Mail, Clock, ArrowUpRight, ChevronDown, Send } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, ArrowUpRight, ChevronDown, Send, Loader2, CheckCircle2 } from 'lucide-react';
 import SiteNavbar from '@/components/SiteNavbar';
 import SiteFooter from '@/components/SiteFooter';
 import PageHeader from '@/components/PageHeader';
@@ -12,6 +12,7 @@ import { WhatsAppIcon } from '@/components/FloatingActions';
 import { FacebookIcon } from '@/components/SiteFooter';
 import { useStore } from '@/context/StoreContext';
 import { SITE, whatsappLink } from '@/lib/site';
+import { sendInquiry } from '@/lib/shopExtras';
 
 const TOPICS = ['Price / buying advice', 'Delivery & installation', 'Warranty or repair help', 'Bulk / business order', 'Something else'];
 
@@ -50,18 +51,33 @@ export default function ContactPage() {
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const submit = (e: React.FormEvent) => {
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [trap, setTrap] = useState('');
+
+  const waText = () =>
+    `Hello ${SITE.name}!\nName: ${form.name}\nPhone: ${form.phone}\nTopic: ${form.topic}${form.town ? `\nTown: ${form.town}` : ''}${
+      form.message ? `\n\n${form.message}` : ''
+    }`;
+
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs: typeof errors = {};
     if (!form.name.trim()) errs.name = 'Please enter your name.';
     if (!/^[0-9+\s-]{9,15}$/.test(form.phone.trim())) errs.phone = 'Please enter a valid phone number, e.g. 077 123 4567.';
     setErrors(errs);
     if (Object.keys(errs).length) return;
-    const msg = `Hello ${SITE.name}!\nName: ${form.name}\nPhone: ${form.phone}\nTopic: ${form.topic}${form.town ? `\nTown: ${form.town}` : ''}${
-      form.message ? `\n\n${form.message}` : ''
-    }`;
-    window.open(whatsappLink(msg), '_blank');
-    showToast('Opening WhatsApp with your message…', '💬');
+    if (trap) return setSent(true); // bots fill the hidden field
+    setSending(true);
+    const ok = await sendInquiry(form);
+    setSending(false);
+    if (ok) {
+      setSent(true);
+      showToast('Message sent — we’ll call you back soon', '✅');
+    } else {
+      window.open(whatsappLink(waText()), '_blank');
+      showToast('Opening WhatsApp with your message…', '💬');
+    }
   };
 
   const cards = [
@@ -137,8 +153,32 @@ export default function ContactPage() {
             <form onSubmit={submit} noValidate className="relative overflow-hidden rounded-[28px] bg-white p-6 ring-1 ring-slate-200/80 sm:p-10">
               <BorderBeam duration={10} />
               <h2 className="font-display text-2xl font-bold sm:text-3xl">Send us a message</h2>
-              <p className="mt-2 text-sm text-slate-500">This opens WhatsApp with your details filled in, so you can send it in one tap.</p>
+              <p className="mt-2 text-sm text-slate-500">We’ll get back to you by phone or WhatsApp, usually the same day.</p>
 
+              {sent ? (
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-8 rounded-3xl bg-emerald-50 p-6 text-center sm:p-8">
+                  <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-500" />
+                  <p className="mt-3 font-display text-xl font-bold">Thank you, {form.name.split(' ')[0] || 'friend'}!</p>
+                  <p className="mt-1 text-sm text-slate-600">Your message reached us. We’ll contact you on {form.phone || 'your phone'} soon.</p>
+                  <div className="mt-6 flex flex-wrap justify-center gap-3">
+                    <a href={whatsappLink(waText())} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-sm font-bold text-white">
+                      <WhatsAppIcon className="h-4 w-4" /> Also chat on WhatsApp
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSent(false);
+                        setForm({ name: '', phone: '', topic: TOPICS[0], town: '', message: '' });
+                      }}
+                      className="rounded-full bg-white px-5 py-3 text-sm font-bold text-ink ring-1 ring-slate-200"
+                    >
+                      Send another
+                    </button>
+                  </div>
+                </motion.div>
+              ) : (
+                <>
+                  <input type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" value={trap} onChange={(e) => setTrap(e.target.value)} className="absolute -left-[9999px] h-0 w-0 opacity-0" name="website" />
               <div className="mt-8 grid gap-5 sm:grid-cols-2">
                 <div>
                   <label htmlFor="name" className="mb-2 block text-sm font-semibold">
@@ -172,9 +212,11 @@ export default function ContactPage() {
                   <p className="mt-1.5 text-xs text-slate-400">e.g. which product, room size, or the model number of an appliance that needs help.</p>
                 </div>
               </div>
-              <button type="submit" className="mt-8 inline-flex items-center gap-2 rounded-full bg-ink px-7 py-4 font-bold text-white transition-colors hover:bg-electric">
-                <Send className="h-4 w-4" /> Continue on WhatsApp
+              <button type="submit" disabled={sending} className="mt-8 inline-flex disabled:opacity-60 items-center gap-2 rounded-full bg-ink px-7 py-4 font-bold text-white transition-colors hover:bg-electric">
+                {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} {sending ? 'Sending…' : 'Send message'}
               </button>
+                </>
+              )}
             </form>
           </Reveal>
 

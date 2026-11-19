@@ -16,9 +16,12 @@ import {
   Clock,
   Tag,
   AlertCircle,
+  MessageSquare,
+  Star,
 } from 'lucide-react';
 import { CATEGORIES } from '@/data/products';
 import { adminListProducts, displayImage, type ShopProductRow } from '@/lib/shopProducts';
+import { adminPendingCounts } from '@/lib/shopExtras';
 import { CategoryPill, CountUp, GradientButton, StatCard, catStyle, lkr } from '@/components/admin/ui';
 
 const ago = (iso?: string) => {
@@ -40,9 +43,11 @@ export default function AdminDashboard() {
   const [rows, setRows] = useState<ShopProductRow[] | null>(null);
   const [err, setErr] = useState('');
   const [hello, setHello] = useState('Welcome');
+  const [pending, setPending] = useState<{ messages: number; reviews: number } | null>(null);
 
   useEffect(() => {
     setHello(greeting());
+    adminPendingCounts().then(setPending).catch(() => {});
     adminListProducts()
       .then(setRows)
       .catch((e) => setErr(e.message ?? 'Could not load products'));
@@ -149,6 +154,29 @@ export default function AdminDashboard() {
             ))}
           </div>
         )
+      )}
+
+      {pending && (
+        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+          <InboxCard
+            href="/admin/messages"
+            icon={MessageSquare}
+            n={pending.messages}
+            title={pending.messages === 1 ? 'new customer message' : 'new customer messages'}
+            empty="No new messages"
+            tone="from-sky-400 to-electric"
+            delay={0.28}
+          />
+          <InboxCard
+            href="/admin/reviews"
+            icon={Star}
+            n={pending.reviews}
+            title={pending.reviews === 1 ? 'review waiting for approval' : 'reviews waiting for approval'}
+            empty="No reviews waiting"
+            tone="from-amber-400 to-orange-500"
+            delay={0.32}
+          />
+        </div>
       )}
 
       {rows && (
@@ -311,5 +339,51 @@ function MiniStat({ label, value, tone }: { label: string; value: number; tone: 
         <CountUp value={value} />
       </p>
     </div>
+  );
+}
+
+function InboxCard({
+  href,
+  icon: Icon,
+  n,
+  title,
+  empty,
+  tone,
+  delay,
+}: {
+  href: string;
+  icon: typeof Tag;
+  n: number;
+  title: string;
+  empty: string;
+  tone: string;
+  delay: number;
+}) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay }}>
+      <Link
+        href={href}
+        className="group relative flex items-center gap-4 overflow-hidden rounded-3xl border border-white/70 bg-white/85 p-5 shadow-[0_10px_40px_-20px_rgba(15,23,42,0.25)] backdrop-blur transition hover:-translate-y-0.5"
+      >
+        <span className={`absolute -right-8 -top-8 h-28 w-28 rounded-full bg-gradient-to-br opacity-20 blur-2xl transition-opacity group-hover:opacity-40 ${tone}`} />
+        <span className={`relative grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br text-white shadow-lg ${tone}`}>
+          <Icon className="h-6 w-6" />
+          {n > 0 && <span className="absolute -right-1 -top-1 h-3 w-3 animate-ping rounded-full bg-rose-500" />}
+        </span>
+        <span className="relative flex-1">
+          {n > 0 ? (
+            <>
+              <span className="font-display text-2xl font-bold text-ink">
+                <CountUp value={n} />
+              </span>{' '}
+              <span className="text-sm font-semibold text-slate-600">{title}</span>
+            </>
+          ) : (
+            <span className="text-sm font-semibold text-slate-500">{empty}</span>
+          )}
+        </span>
+        <ArrowRight className="relative h-5 w-5 text-slate-300 transition-transform group-hover:translate-x-1 group-hover:text-ink" />
+      </Link>
+    </motion.div>
   );
 }
