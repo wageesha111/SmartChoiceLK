@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import Link from 'next/link';
 import { MapPin, Phone, Mail, Clock, ArrowUpRight } from 'lucide-react';
 import { SITE, whatsappLink } from '@/lib/site';
@@ -163,12 +163,8 @@ export default function SiteFooter() {
         </div>
       </div>
 
-      {/* Giant wordmark */}
-      <div className="relative select-none overflow-hidden px-5">
-        <p className="mx-auto max-w-[1280px] translate-y-[22%] whitespace-nowrap text-center font-display text-[11vw] font-extrabold leading-none tracking-tighter text-white/[0.05] xl:text-[150px]">
-          SMART CHOICE
-        </p>
-      </div>
+      {/* Giant wordmark — a light follows the cursor across the letters */}
+      <FooterWordmark />
 
       <div className="relative border-t border-white/10">
         <div className="mx-auto flex max-w-[1280px] flex-col items-center justify-between gap-2 px-5 py-6 text-xs text-white/40 sm:flex-row">
@@ -177,5 +173,58 @@ export default function SiteFooter() {
         </div>
       </div>
     </footer>
+  );
+}
+
+/**
+ * The big "SMART CHOICE" at the bottom. Faint at rest; where the cursor is,
+ * a soft light shines on the letters (fill + rim) and a glow sits behind them.
+ * On touch screens the light follows the finger while dragging.
+ */
+function FooterWordmark() {
+  const ref = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLParagraphElement>(null);
+  const frame = useRef(0);
+
+  const move = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const t = (textRef.current ?? el).getBoundingClientRect();
+    const { clientX, clientY } = e;
+    cancelAnimationFrame(frame.current);
+    frame.current = requestAnimationFrame(() => {
+      // container coords for the glow, text coords for the lit letters
+      el.style.setProperty('--mx', `${clientX - r.left}px`);
+      el.style.setProperty('--my', `${clientY - r.top}px`);
+      el.style.setProperty('--tx', `${clientX - t.left}px`);
+      el.style.setProperty('--ty', `${clientY - t.top}px`);
+      el.dataset.lit = 'on';
+    });
+  };
+  const leave = () => {
+    cancelAnimationFrame(frame.current);
+    if (ref.current) delete ref.current.dataset.lit;
+  };
+
+  const word = 'mx-auto max-w-[1280px] translate-y-[22%] whitespace-nowrap text-center font-display text-[11vw] font-extrabold leading-none tracking-tighter xl:text-[150px]';
+  return (
+    <div
+      ref={ref}
+      onPointerMove={move}
+      onPointerLeave={leave}
+      onPointerCancel={leave}
+      className="sc-wordmark relative select-none overflow-hidden px-5"
+      aria-hidden="true"
+    >
+      {/* glow behind the letters */}
+      <div className="sc-wordmark-glow pointer-events-none absolute inset-0" />
+      {/* resting letters */}
+      <p ref={textRef} className={`${word} text-white/[0.05]`}>SMART CHOICE</p>
+      {/* lit rim: thin outline that only shows near the cursor */}
+      <p className={`${word} sc-wordmark-rim pointer-events-none absolute inset-x-5 top-0`}>SMART CHOICE</p>
+      {/* lit fill */}
+      <p className={`${word} sc-wordmark-fill pointer-events-none absolute inset-x-5 top-0`}>SMART CHOICE</p>
+    </div>
   );
 }

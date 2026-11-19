@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 
 /**
  * "Mirror Hall" intro — a ring of glowing cards standing on a dark rippling pool.
@@ -45,8 +45,16 @@ function paintCard(letter: string, label: string, hue: number, index: number) {
   c.height = H;
   const ctx = c.getContext('2d')!;
 
-  // Domain-warped flow field → liquid marble in brand blues with a warm accent vein
-  const img = ctx.createImageData(W, H);
+  // Domain-warped flow field → liquid marble in brand blues with a warm accent vein.
+  // The marble is smooth, so it is computed at 1/3 size and scaled up: ~9× less
+  // work on the main thread with no visible difference.
+  const SW = Math.round(W / 3);
+  const SH = Math.round(H / 3);
+  const small = document.createElement('canvas');
+  small.width = SW;
+  small.height = SH;
+  const sctx = small.getContext('2d')!;
+  const img = sctx.createImageData(SW, SH);
   const d = img.data;
   const seed = index * 1.731 + 0.37;
   const h2rgb = (h: number, s: number, l: number) => {
@@ -55,10 +63,10 @@ function paintCard(letter: string, label: string, hue: number, index: number) {
     const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
     return [f(0) * 255, f(8) * 255, f(4) * 255];
   };
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      const u = x / W;
-      const v = y / H;
+  for (let y = 0; y < SH; y++) {
+    for (let x = 0; x < SW; x++) {
+      const u = x / SW;
+      const v = y / SH;
       let px = u * 3.2 + seed;
       let py = v * 5.2 - seed * 0.7;
       for (let i = 0; i < 3; i++) {
@@ -76,14 +84,17 @@ function paintCard(letter: string, label: string, hue: number, index: number) {
       g += warm * 60;
       b += warm * 30;
       const vign = 1 - Math.pow(Math.abs(v - 0.5) * 1.6, 3) * 0.6;
-      const o = (y * W + x) * 4;
+      const o = (y * SW + x) * 4;
       d[o] = Math.min(255, r * vign);
       d[o + 1] = Math.min(255, g * vign);
       d[o + 2] = Math.min(255, b * vign);
       d[o + 3] = 255;
     }
   }
-  ctx.putImageData(img, 0, 0);
+  sctx.putImageData(img, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(small, 0, 0, W, H);
 
   // Darken the centre a little so the letter reads clearly
   const cg = ctx.createRadialGradient(W / 2, H / 2, 20, W / 2, H / 2, W * 0.7);
@@ -108,7 +119,7 @@ function paintCard(letter: string, label: string, hue: number, index: number) {
   ctx.shadowBlur = 0;
 
   // Footer: index + label
-  ctx.font = '600 22px "Plus Jakarta Sans", sans-serif';
+  ctx.font = '700 26px "Plus Jakarta Sans", sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.8)';
   ctx.textAlign = 'left';
   ctx.fillText(String(index + 1).padStart(2, '0'), 28, H - 40);
@@ -138,7 +149,7 @@ function paintLabel(text: string) {
   c.width = 512;
   c.height = 64;
   const ctx = c.getContext('2d')!;
-  ctx.font = '600 26px "Plus Jakarta Sans", sans-serif';
+  ctx.font = '700 32px "Plus Jakarta Sans", sans-serif';
   ctx.fillStyle = 'rgba(200,215,255,0.85)';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -199,12 +210,24 @@ export default function MirrorHallIntro() {
   const hostRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLDivElement>(null);
-  const skipRef = useRef<HTMLButtonElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const [active, setActive] = useState(0);
   const [reduced, setReduced] = useState(false);
+
+  // Hide the header before the first paint (also on client-side navigation back
+  // to the home page), so it never shows and then slides away.
+  // On a full page load the inline script in layout.tsx has already done this.
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    if (section && section.getBoundingClientRect().bottom > window.innerHeight) {
+      document.documentElement.dataset.intro = 'on';
+    }
+    return () => {
+      delete document.documentElement.dataset.intro;
+    };
+  }, []);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -212,6 +235,7 @@ export default function MirrorHallIntro() {
     if (!section || !host) return;
     let disposed = false;
     let cleanup: (() => void) | undefined;
+    if (section.getBoundingClientRect().bottom > window.innerHeight) document.documentElement.dataset.intro = 'on';
 
     (async () => {
       const THREE = await import('three');
@@ -232,6 +256,7 @@ export default function MirrorHallIntro() {
       try {
         renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
       } catch {
+        delete document.documentElement.dataset.intro; // no WebGL: keep the header
         setReady(true);
         return;
       }
@@ -270,6 +295,13 @@ export default function MirrorHallIntro() {
       textures.push(glowTex);
 
       for (let i = 0; i < N; i++) {
+        // let the browser paint (title animation, scroll) between cards
+        await new Promise((r) => setTimeout(r, 0));
+        if (disposed) {
+          renderer.dispose();
+          canvas.remove();
+          return;
+        }
         const tex = new THREE.CanvasTexture(paintCard(LETTERS[i], LABELS[i], HUES[i], i));
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = 8;
@@ -351,9 +383,9 @@ export default function MirrorHallIntro() {
       const fit = () => {
         const h = host.clientHeight;
         const hostTop = host.getBoundingClientRect().top;
-        const titleB = titleRef.current ? titleRef.current.getBoundingClientRect().bottom - hostTop + 18 : 0;
-        const wordT = bottomRef.current ? bottomRef.current.getBoundingClientRect().top - hostTop - 12 : h;
-        for (let dz = 0; dz <= 12; dz += 0.5) {
+        const titleB = titleRef.current ? titleRef.current.getBoundingClientRect().bottom - hostTop + 28 : 0;
+        const wordT = bottomRef.current ? bottomRef.current.getBoundingClientRect().top - hostTop - 36 : h;
+        for (let dz = 0; dz <= 30; dz += 0.5) {
           for (let ty = 4; ty >= -1; ty -= 0.04) {
             camera.position.set(camBase.x, camBase.y, camBase.z + dz);
             camera.lookAt(target.x, ty, target.z);
@@ -543,11 +575,11 @@ export default function MirrorHallIntro() {
         if (bottomRef.current) bottomRef.current.style.opacity = String(1 - clamp(asm / 0.35));
         if (titleRef.current) titleRef.current.style.opacity = String(1 - clamp(o / 0.35));
         if (hintRef.current) hintRef.current.style.opacity = String(1 - clamp(p / 0.05));
-        if (skipRef.current) {
-          const so = 1 - clamp((p - (outStart - 0.06)) / 0.06);
-          skipRef.current.style.opacity = String(so);
-          skipRef.current.style.pointerEvents = so < 0.1 ? 'none' : 'auto';
-        }
+        // hide the site header while the intro plays; bring it back as the hero opens
+        const introOn = p < outStart + (1 - outStart) * 0.55 && section.getBoundingClientRect().bottom > 0;
+        const root = document.documentElement;
+        if (introOn && root.dataset.intro !== 'on') root.dataset.intro = 'on';
+        else if (!introOn && root.dataset.intro === 'on') delete root.dataset.intro;
 
         // Opening in the middle: a soft circular hole in the intro grows to reveal the hero,
         // which is held in place underneath and pops from 90% to full size.
@@ -583,6 +615,7 @@ export default function MirrorHallIntro() {
       setReady(true);
 
       cleanup = () => {
+        delete document.documentElement.dataset.intro;
         cancelAnimationFrame(raf);
         window.removeEventListener('scroll', readProgress);
         window.removeEventListener('pointermove', onPointer);
@@ -606,11 +639,7 @@ export default function MirrorHallIntro() {
     };
   }, []);
 
-  const skip = () => {
-    const next = sectionRef.current?.nextElementSibling as HTMLElement | null;
-    next?.scrollIntoView({ behavior: 'smooth' });
-  };
-
+  const calm = useReducedMotion();
   const word = 'SMART CHOICE';
   // number of letters (ignoring the space) revealed so far
   const shown = reduced ? N : active + 1;
@@ -628,50 +657,96 @@ export default function MirrorHallIntro() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,rgba(5,11,26,0.9)_100%)]" />
 
         {/* Top title */}
-        <div ref={titleRef} className="pointer-events-none absolute inset-x-0 top-[92px] text-center text-white sm:top-[96px]">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-white/45 sm:text-[11px]">Smart Choice LK · Seeduwa</p>
-          <h2 className="mt-2 font-display text-3xl font-light tracking-[-0.02em] text-white/95 sm:text-4xl xl:text-[2.75rem]">
-            Choose smart. <span className="text-white/50">Live better.</span>
+        <div ref={titleRef} className="pointer-events-none absolute inset-x-0 top-[44px] px-4 text-center text-white sm:top-[52px]">
+          <motion.p
+            initial={calm ? false : { opacity: 0, letterSpacing: '0.9em' }}
+            animate={{ opacity: 1, letterSpacing: '0.45em' }}
+            transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
+            className="flex items-center justify-center gap-4 text-xs font-semibold uppercase text-white/55 sm:text-sm"
+          >
+            <span className="hidden h-px w-10 bg-gradient-to-r from-transparent to-electric-300 sm:block" />
+            Smart Choice LK · Seeduwa
+            <span className="hidden h-px w-10 bg-gradient-to-l from-transparent to-electric-300 sm:block" />
+          </motion.p>
+          <h2 className="mt-3 font-display text-4xl font-light leading-tight tracking-[-0.025em] sm:text-5xl xl:text-[4rem]">
+            {['Choose', 'smart.'].map((w, i) => (
+              <motion.span
+                key={w}
+                initial={calm ? false : { opacity: 0, y: 28, filter: 'blur(12px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                transition={{ duration: 1, delay: 0.25 + i * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                className="mr-[0.25em] inline-block text-white/95"
+              >
+                {w}
+              </motion.span>
+            ))}
+            <motion.span
+              initial={calm ? false : { opacity: 0, y: 28, filter: 'blur(12px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              transition={{ duration: 1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="sc-chrome-text inline-block animate-shine"
+            >
+              Live better.
+            </motion.span>
           </h2>
         </div>
 
-        {/* Bottom: counter, building word, dots */}
-        <div ref={bottomRef} className="pointer-events-none absolute inset-x-0 bottom-[72px] text-center text-white sm:bottom-[56px]">
-          <p aria-label="Smart Choice" className="font-display text-4xl font-light tracking-[0.18em] sm:text-6xl">
+        {/* Bottom: building word, label, dots */}
+        <div ref={bottomRef} className="pointer-events-none absolute inset-x-0 bottom-[92px] text-center text-white sm:bottom-[84px]">
+          <p aria-label="Smart Choice" className="relative inline-block font-display text-5xl font-light tracking-[0.16em] sm:text-7xl xl:text-[5.5rem]">
             {word.split('').map((ch, i) => {
               const letterIdx = word.slice(0, i + 1).replace(/ /g, '').length; // 1-based among letters
               const on = ch === ' ' || letterIdx <= shown;
               return (
-                <span
+                <motion.span
                   key={i}
                   aria-hidden
-                  className={`inline-block transition-all duration-500 ${on ? 'text-white [text-shadow:0_0_24px_rgba(80,140,255,0.8)]' : 'text-white/[0.12]'}`}
+                  initial={false}
+                  animate={
+                    on
+                      ? { opacity: 1, scale: calm ? 1 : [1.45, 1], filter: calm ? 'blur(0px)' : ['blur(10px)', 'blur(0px)'] }
+                      : { opacity: 0.12, scale: 1, filter: 'blur(0px)' }
+                  }
+                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  style={on ? { animationDelay: `${i * 0.09}s` } : undefined}
+                  className={`inline-block ${on ? 'sc-lit [text-shadow:0_0_28px_rgba(80,140,255,0.85)]' : 'text-white'}`}
                 >
-                  {ch === ' ' ? ' ' : ch}
-                </span>
+                  {ch === ' ' ? '\u00a0' : ch}
+                </motion.span>
               );
             })}
           </p>
-          <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.3em] text-electric-300">{LABELS[active]}</p>
+          <div className="mt-3 h-6 overflow-hidden">
+            {/* re-keyed on change so the new label slides up; no exit step, so fast scrolling never leaves it blank */}
+            <motion.p
+              key={active}
+              initial={calm ? false : { y: 18, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              className="text-sm font-semibold uppercase tracking-[0.32em] text-electric-300 sm:text-base"
+            >
+              {LABELS[active]}
+            </motion.p>
+          </div>
           <div className="mt-4 flex justify-center gap-1.5">
             {LETTERS.map((_, i) => (
-              <span key={i} className={`h-1 rounded-full transition-all duration-500 ${i === active ? 'w-6 bg-white' : 'w-1.5 bg-white/25'}`} />
+              <span
+                key={i}
+                className={`h-1 rounded-full transition-all duration-500 ${
+                  i === active ? 'w-8 bg-white shadow-[0_0_10px_rgba(120,170,255,0.9)]' : i < active ? 'w-1.5 bg-electric-300/70' : 'w-1.5 bg-white/25'
+                }`}
+              />
             ))}
           </div>
         </div>
 
         {/* Scroll hint */}
-        <div ref={hintRef} className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center text-[10px] font-bold uppercase tracking-[0.35em] text-white/50">
+        <div ref={hintRef} className="pointer-events-none absolute inset-x-0 bottom-5 flex flex-col items-center gap-2 text-[10px] font-bold uppercase tracking-[0.35em] text-white/55">
+          <span className="grid h-9 w-[22px] justify-center rounded-full border border-white/35 pt-1.5">
+            <span className="h-2 w-[3px] animate-bounce rounded-full bg-white/80" />
+          </span>
           Scroll
         </div>
-        <button
-          ref={skipRef}
-          onClick={skip}
-          className="absolute bottom-6 left-6 z-10 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-xs font-bold text-white/70 backdrop-blur-md transition-colors hover:bg-white/15 hover:text-white"
-        >
-          Skip intro <ChevronDown className="h-3.5 w-3.5" />
-        </button>
-
       </div>
     </section>
   );

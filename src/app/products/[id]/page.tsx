@@ -13,7 +13,6 @@ import {
   Star,
   Truck,
   Wrench,
-  Zap,
   Check,
   ShoppingBag,
   CreditCard,
@@ -21,9 +20,11 @@ import {
 import SiteNavbar from '@/components/SiteNavbar';
 import SiteFooter from '@/components/SiteFooter';
 import TrustRibbon from '@/components/TrustRibbon';
+import ProductGallery from '@/components/product/ProductGallery';
+import SeeInside from '@/components/product/SeeInside';
 import ProductCard from '@/components/ProductCard';
 import Reveal, { SectionHeading } from '@/components/Reveal';
-import { TiltCard, Magnetic } from '@/components/fx';
+import { Magnetic } from '@/components/fx';
 import { WhatsAppIcon } from '@/components/FloatingActions';
 import { useStore } from '@/context/StoreContext';
 import { ALL_PRODUCTS, CATEGORIES } from '@/data/products';
@@ -41,11 +42,8 @@ export default function ProductDetailPage() {
   const product = ALL_PRODUCTS.find((p) => p.id === Number(params.id)) || ALL_PRODUCTS[0];
   const { addToCart, wishlist, toggleWishlist, formatLKR } = useStore();
 
-  const gallery = product.gallery?.length ? product.gallery : [product.image];
-  const [image, setImage] = useState(gallery[0]);
   const [qty, setQty] = useState(1);
   const [tab, setTab] = useState<Tab>('overview');
-  const [zoom, setZoom] = useState({ on: false, x: 50, y: 50 });
 
   const wished = wishlist.includes(product.id);
   const cat = CATEGORIES.find((c) => c.id === product.category);
@@ -86,59 +84,9 @@ export default function ProductDetailPage() {
         </nav>
 
         <div className="grid gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-14">
-          {/* Gallery */}
+          {/* Gallery: product video first (if any), then photos */}
           <div className="min-w-0 lg:sticky lg:top-[100px] lg:self-start">
-            <TiltCard max={4} glare scale={1} className="rounded-[32px]">
-              <div
-                className="relative aspect-square cursor-zoom-in overflow-hidden rounded-[32px] bg-gradient-to-br from-mist to-slate-200"
-                onPointerMove={(e) => {
-                  const r = e.currentTarget.getBoundingClientRect();
-                  setZoom({ on: true, x: ((e.clientX - r.left) / r.width) * 100, y: ((e.clientY - r.top) / r.height) * 100 });
-                }}
-                onPointerLeave={() => setZoom((z) => ({ ...z, on: false }))}
-              >
-                <AnimatePresence mode="wait">
-                  <motion.img
-                    key={image}
-                    src={image}
-                    alt={product.name}
-                    initial={{ opacity: 0, scale: 1.04 }}
-                    animate={{ opacity: 1, scale: zoom.on ? 1.6 : 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.4 }}
-                    style={{ transformOrigin: `${zoom.x}% ${zoom.y}%` }}
-                    className="h-full w-full object-cover"
-                  />
-                </AnimatePresence>
-                <div className="pointer-events-none absolute left-4 top-4 flex flex-wrap gap-2">
-                  {product.discount ? (
-                    <span className="rounded-full bg-ink px-3 py-1.5 text-xs font-bold text-white">-{product.discount}%</span>
-                  ) : null}
-                  {product.inverter && (
-                    <span className="flex items-center gap-1 rounded-full bg-white/90 px-3 py-1.5 text-xs font-bold text-electric backdrop-blur">
-                      <Zap className="h-3 w-3" /> Inverter
-                    </span>
-                  )}
-                </div>
-              </div>
-            </TiltCard>
-            {gallery.length > 1 && (
-              <div className="mt-4 flex gap-3">
-                {gallery.map((g, i) => (
-                  <button
-                    key={g}
-                    onClick={() => setImage(g)}
-                    aria-label={`Show image ${i + 1}`}
-                    aria-pressed={image === g}
-                    className={`h-20 w-20 overflow-hidden rounded-2xl ring-2 transition-all ${
-                      image === g ? 'ring-electric' : 'ring-transparent opacity-60 hover:opacity-100'
-                    }`}
-                  >
-                    <img src={g} alt="" className="h-full w-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
+            <ProductGallery product={product} />
           </div>
 
           {/* Info */}
@@ -151,9 +99,11 @@ export default function ProductDetailPage() {
             </h1>
 
             <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
-              <span className="flex items-center gap-1 font-semibold">
-                <Star className="h-4 w-4 fill-amber-400 text-amber-400" /> {product.rating}
-              </span>
+              {product.reviews > 0 && (
+                <span className="flex items-center gap-1 font-semibold">
+                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" /> {product.rating}
+                </span>
+              )}
               {product.inStock !== false && (
                 <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> In stock
@@ -324,6 +274,12 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
+      </main>
+
+      {/* Exploded view tied to scroll (only when the product has a video) */}
+      <SeeInside product={product} />
+
+      <div className="mx-auto max-w-[1280px] px-5 pb-20">
         {related.length > 0 && (
           <section className="mt-24">
             <SectionHeading eyebrow="You may also like" title="Similar products" />
@@ -336,7 +292,7 @@ export default function ProductDetailPage() {
             </div>
           </section>
         )}
-      </main>
+      </div>
 
       <TrustRibbon />
       <SiteFooter />

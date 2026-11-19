@@ -81,17 +81,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [selectedQuickViewProduct, setSelectedQuickViewProduct] = useState<Product | null>(null);
   const [toast, setToast] = useState<{ message: string; emoji: string } | null>(null);
 
+  // There is no /api/products route yet (it returned 404 on every page load),
+  // so products come straight from the catalog in src/data.
   const refreshProducts = async () => {
-    try {
-      const res = await fetch('/api/products');
-      const data = await res.json();
-      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-        setProducts(data.data);
-      }
-    } catch {
-      // Fallback silently to ALL_PRODUCTS
-      setProducts(ALL_PRODUCTS);
-    }
+    setProducts(ALL_PRODUCTS);
   };
 
   useEffect(() => {

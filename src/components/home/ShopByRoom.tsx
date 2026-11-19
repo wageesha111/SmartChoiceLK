@@ -59,9 +59,34 @@ export default function ShopByRoom() {
                   alt={c.name}
                   fill
                   sizes="(min-width: 1024px) 40vw, (min-width: 640px) 50vw, 100vw"
+                  unoptimized={c.image.includes('res.cloudinary.com')}
+                  style={c.focus ? { objectPosition: c.focus } : undefined}
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/10 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-ink/75 via-ink/10 to-transparent" />
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-ink/35 to-transparent opacity-80" />
+                {c.brands && c.brands.length > 0 && (() => {
+                  const max = c.id === 'televisions' ? 6 : 3;
+                  const shown = c.brands.slice(0, max);
+                  const more = c.brands.length - shown.length;
+                  const chips = more > 0 ? [...shown, `+${more}`] : shown;
+                  return (
+                    <ul
+                      className="absolute left-4 right-4 top-4 flex flex-nowrap gap-1.5 overflow-hidden"
+                      aria-label={`Brands: ${c.brands.join(', ')}`}
+                    >
+                      {chips.map((b, j) => (
+                        <li
+                          key={b}
+                          style={reduce ? undefined : { animationDelay: `${300 + i * 80 + j * 70}ms` }}
+                          className={`${reduce ? '' : 'sc-chip-in'} shrink-0 rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_4px_14px_-6px_rgba(0,0,0,0.5)] backdrop-blur-md transition-colors duration-300 group-hover:border-white/40 group-hover:bg-white/25`}
+                        >
+                          {b}
+                        </li>
+                      ))}
+                    </ul>
+                  );
+                })()}
                 <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-3 transition-transform duration-500 group-hover:-translate-y-1.5">
                   <div>
                     {c.badge && (
