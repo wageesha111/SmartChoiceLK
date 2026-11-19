@@ -147,7 +147,7 @@ export default function ProductGallery({ product }: { product: Product }) {
               <button
                 key={`${m.type}-${m.src}`}
                 onClick={() => (m.type === 'video' ? playVideo() : setIndex(i))}
-                aria-label={m.type === 'video' ? 'Play product video' : `Show photo ${i}`}
+                aria-label={m.type === 'video' ? 'Play product video' : `Show photo ${i + 1}`}
                 aria-pressed={active}
                 className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl ring-2 transition-all ${
                   active ? 'ring-electric' : 'ring-transparent opacity-60 hover:opacity-100'

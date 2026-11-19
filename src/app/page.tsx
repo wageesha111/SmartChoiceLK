@@ -8,7 +8,6 @@ import {
   ArrowUpRight,
   Zap,
   ShieldCheck,
-  Timer,
   Check,
   MapPin,
   Star,
@@ -26,7 +25,7 @@ import { BorderBeam, Spotlight, ScrubText } from '@/components/fx';
 
 import MirrorHallIntro from '@/components/three/MirrorHallIntro';
 import { useStore } from '@/context/StoreContext';
-import { SMARTCHOICE_OFFERS, SMARTCHOICE_BLOGS } from '@/data/smartchoice-data';
+import { SMARTCHOICE_BLOGS } from '@/data/smartchoice-data';
 import { SITE, whatsappLink } from '@/lib/site';
 
 const TABS = [
@@ -36,28 +35,26 @@ const TABS = [
 ] as const;
 type TabId = (typeof TABS)[number]['id'];
 
-function useCountdown(hours = 48) {
-  const [left, setLeft] = useState(hours * 3600 - 102);
-  useEffect(() => {
-    const t = setInterval(() => setLeft((s) => (s > 0 ? s - 1 : hours * 3600)), 1000);
-    return () => clearInterval(t);
-  }, [hours]);
-  const h = Math.floor(left / 3600);
-  const m = Math.floor((left % 3600) / 60);
-  const s = left % 60;
-  return [h, m, s].map((n) => String(n).padStart(2, '0'));
-}
 
 export default function SmartChoiceHomePage() {
   const { addToCart, formatLKR, showToast, products: ALL_PRODUCTS } = useStore();
   const [tab, setTab] = useState<TabId>('inverters');
-  const [hh, mm, ss] = useCountdown();
 
   const products = useMemo(() => {
     if (tab === 'new') return [...ALL_PRODUCTS].sort((a, b) => b.id - a.id).slice(0, 8);
     if (tab === 'deals') return ALL_PRODUCTS.filter((p) => (p.discount ?? 0) > 0).slice(0, 8);
     return ALL_PRODUCTS.filter((p) => p.inverter).slice(0, 8);
   }, [ALL_PRODUCTS, tab]);
+
+  // Two real deals for the offers band: biggest discount first, in stock only.
+  const deals = useMemo(
+    () =>
+      [...ALL_PRODUCTS]
+        .filter((p) => (p.discount ?? 0) > 0 && p.inStock !== false)
+        .sort((a, b) => (b.originalPrice ? 1 : 0) - (a.originalPrice ? 1 : 0) || (b.discount ?? 0) - (a.discount ?? 0))
+        .slice(0, 2),
+    [ALL_PRODUCTS]
+  );
 
   return (
     <div className="bg-white font-sans text-ink antialiased">
@@ -188,69 +185,63 @@ export default function SmartChoiceHomePage() {
       <section id="featured-offers" className="bg-warm-stone py-24">
         <div className="mx-auto max-w-[1280px] px-5">
           <SectionHeading
-            eyebrow="Limited-time offers"
+            eyebrow="Current offers"
             serif
             title={
               <>
-                This week’s <span className="text-electric">deals</span>
+                Today’s best <span className="text-electric">deals</span>
               </>
             }
             action={
-              <div className="flex items-center gap-3 self-start rounded-2xl bg-ink px-5 py-3 text-white md:self-auto">
-                <Timer className="h-5 w-5 text-electric-300" />
-                <span className="text-xs text-white/50">Ends in</span>
-                <span className="font-display text-lg font-bold tabular-nums">
-                  {hh}
-                  <span className="text-white/30">:</span>
-                  {mm}
-                  <span className="text-white/30">:</span>
-                  {ss}
-                </span>
-              </div>
+              <Link
+                href="/products"
+                className="inline-flex items-center gap-1.5 self-start rounded-full bg-ink px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-electric md:self-auto"
+              >
+                See all products <ArrowRight className="h-4 w-4" />
+              </Link>
             }
           />
 
           <div className="grid gap-5 lg:grid-cols-2">
-            {SMARTCHOICE_OFFERS.map((offer, i) => {
-              const save = offer.originalPrice - offer.price;
+            {deals.map((offer, i) => {
+              const save = offer.originalPrice ? offer.originalPrice - offer.price : 0;
               return (
                 <Reveal key={offer.id} delay={i * 0.08}>
                   <div className="group relative grid h-full overflow-hidden rounded-[28px] bg-ink text-white ring-1 ring-white/10 sm:grid-cols-[0.85fr_1.15fr]">
                     <BorderBeam duration={8 + i * 2} />
-                    <div className="relative min-h-[240px] overflow-hidden">
+                    <Link href={`/products/${offer.id}`} className="relative grid min-h-[240px] place-items-center overflow-hidden bg-[radial-gradient(circle_at_50%_60%,rgba(47,107,255,0.35),transparent_70%)] p-6">
                       <img
                         src={offer.image}
-                        alt={offer.title}
+                        alt={offer.name}
                         loading="lazy"
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                        className="max-h-[220px] w-full object-contain drop-shadow-2xl transition-transform duration-1000 group-hover:scale-105"
                       />
                       <span className="absolute left-4 top-4 rounded-full bg-electric px-3 py-1.5 text-xs font-bold text-white">
-                        Save {formatLKR(save)}
+                        {save > 0 ? `Save ${formatLKR(save)}` : `${offer.discount}% off`}
                       </span>
-                    </div>
+                    </Link>
                     <div className="flex flex-col p-7">
-                      <p className="text-xs font-bold uppercase tracking-[0.16em] text-electric-300">{offer.category}</p>
-                      <h3 className="mt-2 font-serif text-2xl font-medium leading-snug">{offer.title}</h3>
+                      <p className="text-xs font-bold uppercase tracking-[0.16em] text-electric-300">{offer.brand}</p>
+                      <Link href={`/products/${offer.id}`} className="mt-2 font-serif text-2xl font-medium leading-snug hover:text-electric-300">
+                        {offer.name}
+                      </Link>
                       <ul className="mt-4 space-y-2">
-                        {offer.specs.slice(0, 3).map((s) => (
-                          <li key={s} className="flex gap-2 text-sm text-white/70">
+                        {(offer.features ?? []).slice(0, 3).map((f) => (
+                          <li key={f} className="flex gap-2 text-sm text-white/70">
                             <Check className="mt-0.5 h-4 w-4 shrink-0 text-electric-300" />
-                            {s}
+                            {f}
                           </li>
                         ))}
                       </ul>
                       <div className="mt-auto flex items-end justify-between gap-4 pt-6">
                         <div>
-                          <p className="text-xs text-white/40 line-through">{formatLKR(offer.originalPrice)}</p>
+                          {offer.originalPrice ? <p className="text-xs text-white/40 line-through">{formatLKR(offer.originalPrice)}</p> : null}
                           <p className="whitespace-nowrap font-display text-2xl font-bold">{formatLKR(offer.price)}</p>
                         </div>
                         <button
                           onClick={() => {
-                            const match =
-                              ALL_PRODUCTS.find((p) => p.name.includes(offer.category) || p.id === offer.id) ||
-                              ALL_PRODUCTS[0];
-                            addToCart(match.id, 1);
-                            showToast(`Added ${offer.title} to cart!`, '🎉');
+                            addToCart(offer.id, 1);
+                            showToast(`Added ${offer.name} to cart!`, '🎉');
                           }}
                           className="whitespace-nowrap rounded-full bg-electric px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-electric-600"
                         >
@@ -270,13 +261,13 @@ export default function SmartChoiceHomePage() {
 
       {/* ───────────────── COMMUNITY / VISIT ───────────────── */}
       <section className="bg-warm-stone pb-24">
-        <div className="mx-auto grid max-w-[1280px] gap-4 px-5 lg:grid-cols-[1.2fr_1fr]">
+        <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-4 px-5 lg:grid-cols-[1.2fr_1fr] [&>*]:min-w-0">
           <Reveal>
             <div className="relative h-full overflow-hidden rounded-[28px] bg-gradient-to-br from-[#1877F2] to-electric-700 p-8 text-white sm:p-12">
               <FacebookIcon className="absolute -bottom-10 -right-10 h-64 w-64 text-white/10" />
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/70">Our community</p>
-              <div className="mt-6 flex items-end gap-4">
-                <p className="font-display text-7xl font-extrabold leading-none sm:text-8xl">{SITE.facebookRecommend}</p>
+              <div className="mt-6 flex flex-wrap items-end gap-4">
+                <p className="font-display text-6xl font-extrabold leading-none sm:text-8xl">{SITE.facebookRecommend}</p>
                 <div className="pb-2">
                   <div className="flex gap-0.5">
                     {Array.from({ length: 5 }).map((_, i) => (
@@ -359,10 +350,10 @@ export default function SmartChoiceHomePage() {
                     </h3>
                     <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[#6b6458]">{post.excerpt}</p>
                     <Link
-                      href="/about"
+                      href={post.href}
                       className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-ink hover:text-electric"
                     >
-                      Read guide <ArrowRight className="h-4 w-4" />
+                      {post.cta} <ArrowRight className="h-4 w-4" />
                     </Link>
                   </div>
                 </article>

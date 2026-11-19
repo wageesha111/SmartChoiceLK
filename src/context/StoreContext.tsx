@@ -126,6 +126,21 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Once the live catalogue arrives, refresh saved cart items so prices, names and photos are current.
+  useEffect(() => {
+    if (!productsLoaded) return;
+    setCart((items) => {
+      let changed = false;
+      const next = items.map((item) => {
+        const fresh = products.find((p) => p.id === item.id);
+        if (!fresh || (fresh.price === item.price && fresh.name === item.name && fresh.image === item.image && fresh.inStock === item.inStock)) return item;
+        changed = true;
+        return { ...fresh, qty: item.qty };
+      });
+      return changed ? next : items;
+    });
+  }, [products, productsLoaded]);
+
   // Persist changes
   useEffect(() => {
     localStorage.setItem('smartchoice-cart', JSON.stringify(cart));

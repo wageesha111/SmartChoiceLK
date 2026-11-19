@@ -4,10 +4,11 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
-import { ArrowUpRight, CookingPot } from 'lucide-react';
+import { ArrowUpRight, CookingPot, Droplets } from 'lucide-react';
 import { WhatsAppIcon } from '@/components/FloatingActions';
 import { whatsappLink } from '@/lib/site';
 import { CATEGORIES } from '@/data/products';
+import { useStore } from '@/context/StoreContext';
 
 /** "Shop by room" bento on warm stone: AC tall, washer + fridge, TV wide. */
 const LAYOUT: Record<string, string> = {
@@ -20,6 +21,12 @@ const ORDER = ['air-conditioners', 'washing-machines', 'refrigerators', 'televis
 
 export default function ShopByRoom() {
   const reduce = useReducedMotion();
+  const { products } = useStore();
+  // Show the kitchen card only once kitchen items are listed; until then point to water heaters.
+  const hasKitchen = products.some((p) => p.category === 'kitchen');
+  const extra = hasKitchen
+    ? { href: '/products?category=kitchen', icon: CookingPot, title: 'Kitchen & built-in cooking', sub: 'Induction hobs, inverter microwaves & airfryers' }
+    : { href: '/products?category=small-appliances', icon: Droplets, title: 'Water heaters & more', sub: 'Instant water heaters & small appliances' };
   const tiles = ORDER.map((id) => CATEGORIES.find((c) => c.id === id)).filter(Boolean) as typeof CATEGORIES;
 
   return (
@@ -105,19 +112,19 @@ export default function ShopByRoom() {
           ))}
         </div>
 
-        {/* Kitchen + "not sure?" — kept from the previous bento */}
+        {/* Kitchen (or water heaters) + "not sure?" */}
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Link
-            href="/products?category=kitchen"
+            href={extra.href}
             className="group flex items-center justify-between gap-4 rounded-[26px] bg-warm-linen p-6 ring-1 ring-[#e2dbd0] transition-shadow hover:shadow-[0_30px_60px_-30px_rgba(14,31,68,0.35)] sm:p-8"
           >
             <span className="flex items-center gap-4">
               <span className="grid h-12 w-12 place-items-center rounded-2xl bg-warm-sand text-ink">
-                <CookingPot className="h-6 w-6" />
+                <extra.icon className="h-6 w-6" />
               </span>
               <span>
-                <span className="block font-serif text-2xl font-medium">Kitchen &amp; built-in cooking</span>
-                <span className="text-sm text-[#6b6458]">Induction hobs, inverter microwaves &amp; airfryers</span>
+                <span className="block font-serif text-2xl font-medium">{extra.title}</span>
+                <span className="text-sm text-[#6b6458]">{extra.sub}</span>
               </span>
             </span>
             <ArrowUpRight className="h-6 w-6 shrink-0 text-[#8a8275] transition-transform group-hover:rotate-45 group-hover:text-electric" />
