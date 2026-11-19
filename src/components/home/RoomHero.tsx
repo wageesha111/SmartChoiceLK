@@ -188,7 +188,7 @@ export default function RoomHero() {
                     key={`${h.productId}-${h.specKey}`}
                     type="button"
                     aria-label={text}
-                    className="group absolute -translate-x-1/2 -translate-y-1/2 outline-none"
+                    className="group absolute -translate-x-1/2 -translate-y-1/2 p-2 outline-none"
                     style={{ left: `${pt.x}%`, top: `${pt.y}%` }}
                   >
                     <span className="relative grid h-7 w-7 place-items-center">
@@ -259,7 +259,7 @@ export default function RoomHero() {
           </div>
 
           {/* Rail: which room, and jump to any */}
-          <div className="absolute right-4 top-1/2 z-[6] flex -translate-y-1/2 flex-col items-center gap-2 sm:right-7 motion-reduce:hidden">
+          <div className="absolute right-2 top-1/2 z-[6] flex -translate-y-1/2 flex-col items-center sm:right-5 motion-reduce:hidden">
             {ROOM_SCENES.map((s, i) => (
               <button
                 key={s.id}
@@ -267,7 +267,7 @@ export default function RoomHero() {
                 onClick={() => goTo(i)}
                 aria-label={`Show ${s.eyebrow}`}
                 aria-current={i === shown}
-                className="grid h-7 w-5 place-items-center"
+                className="grid h-10 w-10 place-items-center"
               >
                 <span className={`w-[3px] rounded-full transition-all duration-500 ${i === shown ? 'h-7 bg-white' : 'h-3 bg-white/35'}`} />
               </button>
