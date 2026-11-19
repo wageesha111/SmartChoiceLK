@@ -54,10 +54,10 @@ export default function SmartChoiceHomePage() {
   const [hh, mm, ss] = useCountdown();
 
   const products = useMemo(() => {
-    if (tab === 'new') return ALL_PRODUCTS.filter((p) => p.badge?.includes('New') || p.id % 2 === 0).slice(0, 8);
+    if (tab === 'new') return [...ALL_PRODUCTS].sort((a, b) => b.id - a.id).slice(0, 8);
     if (tab === 'deals') return ALL_PRODUCTS.filter((p) => (p.discount ?? 0) > 0).slice(0, 8);
     return ALL_PRODUCTS.filter((p) => p.inverter).slice(0, 8);
-  }, [tab]);
+  }, [ALL_PRODUCTS, tab]);
 
   return (
     <div className="bg-white font-sans text-ink antialiased">

@@ -203,7 +203,7 @@ function Catalog() {
     if (sortBy === 'rating') list.sort((a, b) => b.rating - a.rating);
     if (sortBy === 'discount') list.sort((a, b) => (b.discount || 0) - (a.discount || 0));
     return list;
-  }, [category, brand, inverterOnly, maxPrice, query, sortBy]);
+  }, [ALL_PRODUCTS, category, brand, inverterOnly, maxPrice, query, sortBy]);
 
   const catName = CATEGORIES.find((c) => c.id === category)?.name;
   const activeFilters = (brand !== 'All' ? 1 : 0) + (inverterOnly ? 1 : 0) + (maxPrice < MAX_PRICE ? 1 : 0);
