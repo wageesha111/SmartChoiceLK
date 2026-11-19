@@ -2688,3 +2688,17 @@ html[data-intro="on"] .sc-header { opacity: 0; transform: translateY(-120%); poi
 @media (prefers-reduced-motion: reduce) {
   .sc-wordmark-fill, .sc-wordmark-rim, .sc-wordmark-glow { transition: none; }
 }
+
+/* admin: moving shine on progress bars */
+.sc-bar-shine {
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.55) 50%, transparent 80%);
+  background-size: 200% 100%;
+  animation: sc-bar-shine 2.6s ease-in-out infinite;
+}
+@keyframes sc-bar-shine {
+  from { background-position: 150% 0; }
+  to { background-position: -50% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sc-bar-shine { animation: none; }
+}

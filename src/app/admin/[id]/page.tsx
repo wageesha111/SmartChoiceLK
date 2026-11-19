@@ -1,54 +1,48 @@
 'use client';
 
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams, useSearchParams } from 'next/navigation';
-import { Loader2, CheckCircle2 } from 'lucide-react';
+import { useParams } from 'next/navigation';
+import { PackageSearch } from 'lucide-react';
 import ProductForm from '@/components/admin/ProductForm';
 import { adminGetProduct, type ShopProductRow } from '@/lib/shopProducts';
 
 export default function EditProductPage() {
-  return (
-    <Suspense fallback={null}>
-      <EditProduct />
-    </Suspense>
-  );
-}
-
-function EditProduct() {
   const params = useParams();
-  const search = useSearchParams();
   const id = Number(params.id);
   const [row, setRow] = useState<ShopProductRow | null | undefined>(undefined);
   const [err, setErr] = useState('');
 
   useEffect(() => {
+    setRow(undefined);
     adminGetProduct(id)
       .then(setRow)
       .catch((e) => setErr(e.message ?? 'Could not load'));
   }, [id]);
 
-  if (err) return <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">{err}</p>;
+  if (err) return <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{err}</p>;
   if (row === undefined)
     return (
-      <div className="flex justify-center py-24 text-slate-400">
-        <Loader2 className="h-6 w-6 animate-spin" />
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="space-y-6">
+          {[280, 220, 180].map((h) => (
+            <div key={h} className="animate-pulse rounded-3xl bg-white/70" style={{ height: h }} />
+          ))}
+        </div>
+        <div className="h-[460px] animate-pulse rounded-3xl bg-white/70" />
       </div>
     );
   if (row === null)
     return (
-      <p className="py-16 text-center text-slate-500">
-        Product not found. <Link href="/admin" className="font-semibold text-electric">Back to products</Link>
-      </p>
+      <div className="rounded-3xl border border-dashed border-slate-300 bg-white/60 py-16 text-center">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-electric to-violet-500 text-white shadow-lg shadow-electric/30">
+          <PackageSearch className="h-6 w-6" />
+        </div>
+        <p className="mt-4 font-display text-lg font-bold">Product not found</p>
+        <Link href="/admin/products" className="mt-2 inline-block text-sm font-bold text-electric">
+          Back to products
+        </Link>
+      </div>
     );
-  return (
-    <div className="space-y-4">
-      {search.get('saved') && (
-        <p className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
-          <CheckCircle2 className="h-5 w-5" /> Product added. It’s on the website now.
-        </p>
-      )}
-      <ProductForm initial={row} />
-    </div>
-  );
+  return <ProductForm key={row.id} initial={row} />;
 }
