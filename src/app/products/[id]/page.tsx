@@ -27,8 +27,9 @@ import Reveal, { SectionHeading } from '@/components/Reveal';
 import { Magnetic } from '@/components/fx';
 import { WhatsAppIcon } from '@/components/FloatingActions';
 import { useStore } from '@/context/StoreContext';
-import { ALL_PRODUCTS, CATEGORIES } from '@/data/products';
+import { CATEGORIES } from '@/data/products';
 import { SITE, whatsappLink } from '@/lib/site';
+import type { Product } from '@/types';
 
 const TABS = [
   { id: 'overview', label: 'Overview' },
@@ -39,8 +40,34 @@ type Tab = (typeof TABS)[number]['id'];
 
 export default function ProductDetailPage() {
   const params = useParams();
-  const product = ALL_PRODUCTS.find((p) => p.id === Number(params.id)) || ALL_PRODUCTS[0];
-  const { addToCart, wishlist, toggleWishlist, formatLKR } = useStore();
+  const { products, productsLoaded } = useStore();
+  const found = products.find((p) => p.id === Number(params.id));
+  if (!found) {
+    return (
+      <div className="bg-white font-sans text-ink antialiased">
+        <SiteNavbar />
+        <main className="mx-auto flex min-h-[60vh] max-w-[1280px] flex-col items-center justify-center gap-4 px-5 text-center">
+          {productsLoaded ? (
+            <>
+              <h1 className="font-display text-3xl font-bold">This product isn’t available</h1>
+              <p className="text-slate-500">It may have been sold out or removed.</p>
+              <Link href="/products" className="rounded-full bg-ink px-5 py-2.5 text-sm font-bold text-white">
+                See all products
+              </Link>
+            </>
+          ) : (
+            <p className="text-slate-500">Loading…</p>
+          )}
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
+  return <ProductDetail key={found.id} product={found} />;
+}
+
+function ProductDetail({ product }: { product: Product }) {
+  const { addToCart, wishlist, toggleWishlist, formatLKR, products: ALL_PRODUCTS } = useStore();
 
   const [qty, setQty] = useState(1);
   const [tab, setTab] = useState<Tab>('overview');

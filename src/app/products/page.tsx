@@ -23,7 +23,7 @@ import TrustRibbon from '@/components/TrustRibbon';
 import PageHeader from '@/components/PageHeader';
 import ProductCard from '@/components/ProductCard';
 import { useStore } from '@/context/StoreContext';
-import { ALL_PRODUCTS, CATEGORIES, BRANDS } from '@/data/products';
+import { CATEGORIES } from '@/data/products';
 import { whatsappLink } from '@/lib/site';
 
 const CAT_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -61,7 +61,8 @@ function Filters({
   setMaxPrice: (n: number) => void;
   reset: () => void;
 }) {
-  const { formatLKR } = useStore();
+  const { formatLKR, products } = useStore();
+  const BRANDS = ['All Brands', ...Array.from(new Set(products.map((p) => p.brand).filter(Boolean) as string[]))];
   return (
     <div className="space-y-7">
       <div className="flex items-center justify-between">
@@ -153,6 +154,7 @@ function Filters({
 }
 
 function Catalog() {
+  const { products: ALL_PRODUCTS } = useStore();
   const params = useSearchParams();
   const router = useRouter();
 
