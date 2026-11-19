@@ -45,8 +45,16 @@ function paintCard(letter: string, label: string, hue: number, index: number) {
   c.height = H;
   const ctx = c.getContext('2d')!;
 
-  // Domain-warped flow field → liquid marble in brand blues with a warm accent vein
-  const img = ctx.createImageData(W, H);
+  // Domain-warped flow field → liquid marble in brand blues with a warm accent vein.
+  // The marble is smooth, so it is computed at 1/3 size and scaled up: ~9× less
+  // work on the main thread with no visible difference.
+  const SW = Math.round(W / 3);
+  const SH = Math.round(H / 3);
+  const small = document.createElement('canvas');
+  small.width = SW;
+  small.height = SH;
+  const sctx = small.getContext('2d')!;
+  const img = sctx.createImageData(SW, SH);
   const d = img.data;
   const seed = index * 1.731 + 0.37;
   const h2rgb = (h: number, s: number, l: number) => {
@@ -55,10 +63,10 @@ function paintCard(letter: string, label: string, hue: number, index: number) {
     const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
     return [f(0) * 255, f(8) * 255, f(4) * 255];
   };
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      const u = x / W;
-      const v = y / H;
+  for (let y = 0; y < SH; y++) {
+    for (let x = 0; x < SW; x++) {
+      const u = x / SW;
+      const v = y / SH;
       let px = u * 3.2 + seed;
       let py = v * 5.2 - seed * 0.7;
       for (let i = 0; i < 3; i++) {
@@ -76,14 +84,17 @@ function paintCard(letter: string, label: string, hue: number, index: number) {
       g += warm * 60;
       b += warm * 30;
       const vign = 1 - Math.pow(Math.abs(v - 0.5) * 1.6, 3) * 0.6;
-      const o = (y * W + x) * 4;
+      const o = (y * SW + x) * 4;
       d[o] = Math.min(255, r * vign);
       d[o + 1] = Math.min(255, g * vign);
       d[o + 2] = Math.min(255, b * vign);
       d[o + 3] = 255;
     }
   }
-  ctx.putImageData(img, 0, 0);
+  sctx.putImageData(img, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(small, 0, 0, W, H);
 
   // Darken the centre a little so the letter reads clearly
   const cg = ctx.createRadialGradient(W / 2, H / 2, 20, W / 2, H / 2, W * 0.7);
@@ -270,6 +281,13 @@ export default function MirrorHallIntro() {
       textures.push(glowTex);
 
       for (let i = 0; i < N; i++) {
+        // let the browser paint (title animation, scroll) between cards
+        await new Promise((r) => setTimeout(r, 0));
+        if (disposed) {
+          renderer.dispose();
+          canvas.remove();
+          return;
+        }
         const tex = new THREE.CanvasTexture(paintCard(LETTERS[i], LABELS[i], HUES[i], i));
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = 8;
