@@ -27,7 +27,7 @@ export default function ProductReviews({ productId, productName }: { productId: 
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState('');
-  const [trap, setTrap] = useState('');
+  const [openedAt, setOpenedAt] = useState(0);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [err, setErr] = useState('');
@@ -45,7 +45,8 @@ export default function ProductReviews({ productId, productName }: { productId: 
     setErr('');
     if (!name.trim()) return setErr('Please enter your name.');
     if (!rating) return setErr('Please choose a star rating.');
-    if (trap) return setDone(true);
+    // bots submit instantly; people take a few seconds
+    if (Date.now() - openedAt < 2500) return setErr('Please take a moment to check your review, then submit again.');
     setBusy(true);
     const ok = await submitReview({ product_id: productId, name, rating, comment });
     setBusy(false);
@@ -62,7 +63,10 @@ export default function ProductReviews({ productId, productName }: { productId: 
         </div>
         {!open && !done && (
           <button
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              setOpen(true);
+              setOpenedAt(Date.now());
+            }}
             className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-electric"
           >
             <MessageSquarePlus className="h-4 w-4" /> Write a review
@@ -127,7 +131,6 @@ export default function ProductReviews({ productId, productName }: { productId: 
                 className="relative overflow-hidden rounded-[28px] bg-white p-6 ring-1 ring-slate-200/80"
               >
                 <p className="font-display text-lg font-bold">Review {productName}</p>
-                <input type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" value={trap} onChange={(e) => setTrap(e.target.value)} className="absolute -left-[9999px] h-0 w-0 opacity-0" name="website" />
                 <div className="mt-4">
                   <p className="mb-2 text-sm font-semibold">Your rating</p>
                   <div className="flex gap-1" onMouseLeave={() => setHover(0)}>

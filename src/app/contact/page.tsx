@@ -53,7 +53,7 @@ export default function ContactPage() {
 
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
-  const [trap, setTrap] = useState('');
+  const [loadedAt] = useState(() => Date.now());
 
   const waText = () =>
     `Hello ${SITE.name}!\nName: ${form.name}\nPhone: ${form.phone}\nTopic: ${form.topic}${form.town ? `\nTown: ${form.town}` : ''}${
@@ -67,7 +67,7 @@ export default function ContactPage() {
     if (!/^[0-9+\s-]{9,15}$/.test(form.phone.trim())) errs.phone = 'Please enter a valid phone number, e.g. 077 123 4567.';
     setErrors(errs);
     if (Object.keys(errs).length) return;
-    if (trap) return setSent(true); // bots fill the hidden field
+    if (Date.now() - loadedAt < 2500) return; // bots submit instantly
     setSending(true);
     const ok = await sendInquiry(form);
     setSending(false);
@@ -178,7 +178,6 @@ export default function ContactPage() {
                 </motion.div>
               ) : (
                 <>
-                  <input type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" value={trap} onChange={(e) => setTrap(e.target.value)} className="absolute -left-[9999px] h-0 w-0 opacity-0" name="website" />
               <div className="mt-8 grid gap-5 sm:grid-cols-2">
                 <div>
                   <label htmlFor="name" className="mb-2 block text-sm font-semibold">
