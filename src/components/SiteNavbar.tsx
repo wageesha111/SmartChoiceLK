@@ -118,7 +118,7 @@ function NavInner() {
   return (
     <>
       {/* Announcement marquee */}
-      <div className="relative z-[60] overflow-hidden border-b border-white/10 bg-ink text-[12.5px] font-medium text-white/70">
+      <div className="sc-announce relative z-[60] overflow-hidden border-b border-white/10 bg-ink text-[12.5px] font-medium text-white/70">
         <div className="flex w-max animate-marquee gap-10 py-2">
           {[...ANNOUNCEMENTS, ...ANNOUNCEMENTS].map((t, i) => (
             <span key={i} className="flex items-center gap-10 whitespace-nowrap">
@@ -130,7 +130,7 @@ function NavInner() {
       </div>
 
       {/* Sticky glass header */}
-      <header className="sticky top-0 z-[50] px-3 pt-3 sm:px-5">
+      <header className="sc-header sticky top-0 z-[50] px-3 pt-3 sm:px-5">
         <div
           className={`mx-auto flex h-16 max-w-[1280px] items-center gap-3 rounded-2xl border px-3 transition-all duration-500 sm:px-4 ${
             scrolled

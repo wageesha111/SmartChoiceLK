@@ -2633,3 +2633,19 @@ h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0
 @media (prefers-reduced-motion: reduce) {
   .sc-border-beam, .sc-shimmer::after { animation: none !important; }
 }
+
+/* Intro: a light wave travels across the lit letters of SMART CHOICE */
+.sc-lit {
+  background: linear-gradient(105deg, #ffffff 42%, #9fc0ff 50%, #ffffff 58%);
+  background-size: 300% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: sc-lit 5s ease-in-out infinite;
+}
+@keyframes sc-lit { 0% { background-position: 100% 0; } 55%, 100% { background-position: 0% 0; } }
+
+/* Hide the site header while the home-page intro plays */
+.sc-announce, .sc-header { transition: opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1); }
+html[data-intro="on"] .sc-announce { border-color: transparent; }
+html[data-intro="on"] .sc-announce > * { opacity: 0; }
+html[data-intro="on"] .sc-header { opacity: 0; transform: translateY(-120%); pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .sc-lit { animation: none; } }
