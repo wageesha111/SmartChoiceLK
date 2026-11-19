@@ -289,25 +289,31 @@ export const SMARTCHOICE_BLOGS = [
     author: 'Smart Choice Tech Team',
     image: '/appliances/luxury-ac.jpg',
     excerpt:
-      'Calculate exact BTU capacity factoring in ceiling height, direct sunlight, and glass windows to maximize cooling speed while slashing energy consumption.',
+      'Room size, sunlight and windows all change how many BTU you need. Tell us your room and we’ll suggest the right size, so it cools fast without wasting power.',
+    href: '/products?category=air-conditioners',
+    cta: 'Browse air conditioners',
   },
   {
     id: 2,
-    title: 'Inverter vs Non-Inverter Refrigerators: Real Electricity Bill Comparison',
+    title: 'Inverter vs Non-Inverter Refrigerators: What’s the Difference?',
     date: '12 October 2024',
     author: 'Energy Efficiency Advisor',
     image: '/appliances/luxury-fridge.jpg',
     excerpt:
-      'A comprehensive 12-month power meter test showing how modern linear inverter compressors adjust speeds continuously to save thousands of rupees annually.',
+      'Inverter compressors change speed instead of switching on and off, which usually means lower electricity bills and quieter running.',
+    href: '/products?category=refrigerators',
+    cta: 'Browse refrigerators',
   },
   {
     id: 3,
-    title: 'Front Load vs Top Load: Which Washing Machine Lasts Longer in Tropical Climates?',
+    title: 'Front Load vs Top Load: Which Washing Machine Suits You?',
     date: '05 October 2024',
     author: 'Appliance Care Specialist',
     image: 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?auto=format&fit=crop&w=800&q=80',
     excerpt:
-      'Compare water savings, spin RPM, steam hygiene cycles, and hard-water resistance to select the ideal washing machine for your family.',
+      'Front loaders use less water and are gentler on clothes; top loaders cost less and are easier to load. We’ll help you pick for your family.',
+    href: '/products?category=washing-machines',
+    cta: 'Browse washing machines',
   },
 ];
 

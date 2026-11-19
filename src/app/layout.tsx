@@ -6,6 +6,7 @@ import { StoreProvider } from '@/context/StoreContext';
 import GlobalDrawers from '@/components/GlobalDrawers';
 import FloatingActions from '@/components/FloatingActions';
 import SiteAnalytics from '@/components/SiteAnalytics';
+import { SITE_URL } from '@/lib/siteUrl';
 
 const fraunces = Fraunces({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-serif', display: 'swap' });
 
@@ -23,6 +24,7 @@ export const metadata: Metadata = {
     'Samsung QLED TV Sri Lanka',
     'Home Appliances Negombo Seeduwa',
   ],
+  metadataBase: new URL(SITE_URL),
   icons: {
     icon: '/smart-choice-logo.png',
   },

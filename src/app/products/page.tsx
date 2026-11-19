@@ -119,7 +119,7 @@ function Filters({
       <div>
         <div className="mb-3 flex items-baseline justify-between">
           <h3 className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Max price</h3>
-          <span className="font-display text-sm font-bold text-ink">{formatLKR(maxPrice)}</span>
+          <span className="font-display text-sm font-bold text-ink">{maxPrice >= MAX_PRICE ? 'Any price' : formatLKR(maxPrice)}</span>
         </div>
         <input
           type="range"
@@ -133,7 +133,7 @@ function Filters({
         />
         <div className="mt-1 flex justify-between text-[11px] text-slate-400">
           <span>{formatLKR(50000)}</span>
-          <span>{formatLKR(MAX_PRICE)}</span>
+          <span>{formatLKR(MAX_PRICE)}+</span>
         </div>
       </div>
 
@@ -194,7 +194,7 @@ function Catalog() {
       if (category !== 'all' && p.category !== category) return false;
       if (brand !== 'All' && p.brand !== brand) return false;
       if (inverterOnly && !p.inverter) return false;
-      if (p.price > maxPrice) return false;
+      if (maxPrice < MAX_PRICE && p.price > maxPrice) return false; // top of the slider means "any price"
       if (q && !`${p.name} ${p.brand ?? ''} ${p.category}`.toLowerCase().includes(q)) return false;
       return true;
     });
@@ -252,6 +252,7 @@ function Catalog() {
             const Icon = CAT_ICON[c.id] ?? LayoutGrid;
             const active = category === c.id;
             const count = c.id === 'all' ? ALL_PRODUCTS.length : ALL_PRODUCTS.filter((p) => p.category === c.id).length;
+            if (!count && !active) return null; // hide empty categories
             return (
               <button
                 key={c.id}
