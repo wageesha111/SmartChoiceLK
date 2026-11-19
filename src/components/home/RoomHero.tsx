@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import { ROOM_SCENES, sceneFromProgress, resolveHotspot, coverPoint } from '@/lib/roomScenes';
-import { ALL_PRODUCTS } from '@/data/products';
+import { useStore } from '@/context/StoreContext';
 import { TRUST_ITEMS } from '@/components/TrustRibbon';
 import { WhatsAppIcon } from '@/components/FloatingActions';
 import { whatsappLink } from '@/lib/site';
@@ -30,6 +30,7 @@ const parsePos = (focal: string): [number, number] => {
 };
 
 export default function RoomHero() {
+  const { products: ALL_PRODUCTS } = useStore();
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const layerRefs = useRef<(HTMLDivElement | null)[]>([]);

@@ -26,7 +26,6 @@ import { BorderBeam, Spotlight, ScrubText } from '@/components/fx';
 
 import MirrorHallIntro from '@/components/three/MirrorHallIntro';
 import { useStore } from '@/context/StoreContext';
-import { ALL_PRODUCTS } from '@/data/products';
 import { SMARTCHOICE_OFFERS, SMARTCHOICE_BLOGS } from '@/data/smartchoice-data';
 import { SITE, whatsappLink } from '@/lib/site';
 
@@ -50,7 +49,7 @@ function useCountdown(hours = 48) {
 }
 
 export default function SmartChoiceHomePage() {
-  const { addToCart, formatLKR, showToast } = useStore();
+  const { addToCart, formatLKR, showToast, products: ALL_PRODUCTS } = useStore();
   const [tab, setTab] = useState<TabId>('inverters');
   const [hh, mm, ss] = useCountdown();
 

@@ -3,9 +3,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, CartItem, User, Order } from '@/types';
 import { ALL_PRODUCTS } from '@/data/products';
+import { fetchShopProducts } from '@/lib/shopProducts';
 
 interface StoreContextType {
   products: Product[];
+  /** true once the live list from Supabase has loaded (or failed and we kept the built-in list) */
+  productsLoaded: boolean;
   refreshProducts: () => Promise<void>;
   cart: CartItem[];
   wishlist: number[];
@@ -64,6 +67,7 @@ export function formatLKR(amount: number): string {
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [products, setProducts] = useState<Product[]>(ALL_PRODUCTS);
+  const [productsLoaded, setProductsLoaded] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<number[]>([]);
   const [compareList, setCompareList] = useState<number[]>([]);
@@ -81,10 +85,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [selectedQuickViewProduct, setSelectedQuickViewProduct] = useState<Product | null>(null);
   const [toast, setToast] = useState<{ message: string; emoji: string } | null>(null);
 
-  // There is no /api/products route yet (it returned 404 on every page load),
-  // so products come straight from the catalog in src/data.
+  // Live product list from Supabase (edited in /admin). If Supabase isn't
+  // configured or can't be reached, the built-in catalog stays in place.
   const refreshProducts = async () => {
-    setProducts(ALL_PRODUCTS);
+    try {
+      const live = await fetchShopProducts();
+      if (live && live.length > 0) setProducts(live);
+    } catch {
+      /* keep ALL_PRODUCTS */
+    } finally {
+      setProductsLoaded(true);
+    }
   };
 
   useEffect(() => {
@@ -287,6 +298,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     <StoreContext.Provider
       value={{
         products,
+        productsLoaded,
         refreshProducts,
         cart,
         wishlist,
