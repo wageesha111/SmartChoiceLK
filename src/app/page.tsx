@@ -202,7 +202,7 @@ export default function SmartChoiceHomePage() {
             }
           />
 
-          <div className="grid gap-5 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 [&>*]:min-w-0">
             {deals.map((offer, i) => {
               const save = offer.originalPrice ? offer.originalPrice - offer.price : 0;
               return (
@@ -220,7 +220,7 @@ export default function SmartChoiceHomePage() {
                         {save > 0 ? `Save ${formatLKR(save)}` : `${offer.discount}% off`}
                       </span>
                     </Link>
-                    <div className="flex flex-col p-7">
+                    <div className="flex min-w-0 flex-col p-6 sm:p-7">
                       <p className="text-xs font-bold uppercase tracking-[0.16em] text-electric-300">{offer.brand}</p>
                       <Link href={`/products/${offer.id}`} className="mt-2 font-serif text-2xl font-medium leading-snug hover:text-electric-300">
                         {offer.name}
@@ -233,7 +233,7 @@ export default function SmartChoiceHomePage() {
                           </li>
                         ))}
                       </ul>
-                      <div className="mt-auto flex items-end justify-between gap-4 pt-6">
+                      <div className="mt-auto flex flex-wrap items-end justify-between gap-4 pt-6">
                         <div>
                           {offer.originalPrice ? <p className="text-xs text-white/40 line-through">{formatLKR(offer.originalPrice)}</p> : null}
                           <p className="whitespace-nowrap font-display text-2xl font-bold">{formatLKR(offer.price)}</p>

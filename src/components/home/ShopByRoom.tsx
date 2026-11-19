@@ -86,7 +86,7 @@ export default function ShopByRoom() {
                         <li
                           key={b}
                           style={reduce ? undefined : { animationDelay: `${300 + i * 80 + j * 70}ms` }}
-                          className={`${reduce ? '' : 'sc-chip-in'} shrink-0 rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_4px_14px_-6px_rgba(0,0,0,0.5)] backdrop-blur-md transition-colors duration-300 group-hover:border-white/40 group-hover:bg-white/25`}
+                          className={`${reduce ? '' : 'sc-chip-in'} shrink-0 rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-white shadow-[0_4px_14px_-6px_rgba(0,0,0,0.5)] backdrop-blur-md transition-colors duration-300 group-hover:border-white/40 group-hover:bg-white/25`}
                         >
                           {b}
                         </li>
