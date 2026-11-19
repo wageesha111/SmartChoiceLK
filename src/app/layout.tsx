@@ -45,9 +45,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={fraunces.variable}>
+    <html lang="en" className={fraunces.variable} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
+        {/* Home page intro: hide the header from the very first paint, so it
+            doesn't appear and then slide up when the intro script loads. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(location.pathname==='/'&&window.scrollY<window.innerHeight)document.documentElement.dataset.intro='on'}catch(e){}",
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

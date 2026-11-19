@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
 /**
@@ -216,6 +216,19 @@ export default function MirrorHallIntro() {
   const [active, setActive] = useState(0);
   const [reduced, setReduced] = useState(false);
 
+  // Hide the header before the first paint (also on client-side navigation back
+  // to the home page), so it never shows and then slides away.
+  // On a full page load the inline script in layout.tsx has already done this.
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    if (section && section.getBoundingClientRect().bottom > window.innerHeight) {
+      document.documentElement.dataset.intro = 'on';
+    }
+    return () => {
+      delete document.documentElement.dataset.intro;
+    };
+  }, []);
+
   useEffect(() => {
     const section = sectionRef.current;
     const host = hostRef.current;
@@ -243,6 +256,7 @@ export default function MirrorHallIntro() {
       try {
         renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
       } catch {
+        delete document.documentElement.dataset.intro; // no WebGL: keep the header
         setReady(true);
         return;
       }
