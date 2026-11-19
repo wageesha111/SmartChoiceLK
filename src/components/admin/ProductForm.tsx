@@ -251,7 +251,7 @@ export default function ProductForm({ initial }: { initial?: ShopProductRow }) {
       const id = await adminSaveProduct(build(), initial?.id);
       setBaseline(snapshot(p, specs, featuresText));
       if (!initial) {
-        toast('Product added — it’s on the website now');
+        toast(p.published ? 'Product added — it’s on the website now' : 'Product added (hidden from the website)');
         router.replace(`/admin/${id}`);
       } else toast('Changes saved');
     } catch (e) {
@@ -312,7 +312,7 @@ export default function ProductForm({ initial }: { initial?: ShopProductRow }) {
         )}
       </motion.div>
 
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px] [&>*]:min-w-0">
         <div className="space-y-6">
           <Card title="Photos" icon={ImageIcon} tone="from-sky-400 to-electric">
             <div className="grid gap-5 sm:grid-cols-[240px_1fr]">
@@ -397,14 +397,14 @@ export default function ProductForm({ initial }: { initial?: ShopProductRow }) {
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
-                      className="group relative h-20 w-20 overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-200"
+                      className="group relative h-24 w-24 overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-200"
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={plainImage(g, 200)} alt="" className="h-full w-full object-cover" />
                       <button
                         type="button"
                         onClick={() => set('gallery', p.gallery.filter((_, j) => j !== i))}
-                        className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/60 text-white transition hover:bg-rose-500"
+                        className="absolute right-1 top-1 grid h-8 w-8 place-items-center rounded-full bg-black/60 text-white transition hover:bg-rose-500"
                         aria-label="Remove photo"
                       >
                         <X className="h-3.5 w-3.5" />
@@ -415,7 +415,7 @@ export default function ProductForm({ initial }: { initial?: ShopProductRow }) {
                 <button
                   type="button"
                   onClick={() => extraInput.current?.click()}
-                  className="grid h-20 w-20 place-items-center rounded-2xl border-2 border-dashed border-slate-300 text-slate-400 transition hover:border-electric hover:text-electric"
+                  className="grid h-24 w-24 place-items-center rounded-2xl border-2 border-dashed border-slate-300 text-slate-400 transition hover:border-electric hover:text-electric"
                   aria-label="Add more photos"
                 >
                   {uploading === 'extra' ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImagePlus className="h-6 w-6" />}
@@ -628,6 +628,7 @@ export default function ProductForm({ initial }: { initial?: ShopProductRow }) {
           <span className="mr-auto flex items-center gap-2 text-sm">
             <span className={`h-2.5 w-2.5 rounded-full ${dirty ? 'animate-pulse bg-amber-400' : 'bg-emerald-400'}`} />
             <span className="hidden font-semibold text-white/80 sm:inline">{dirty ? 'Unsaved changes' : initial ? 'All changes saved' : 'Fill in the details'}</span>
+            <span className="text-xs font-semibold text-white/80 sm:hidden">{dirty ? 'Unsaved' : initial ? 'Saved' : ''}</span>
           </span>
           {initial && p.published && (
             <a

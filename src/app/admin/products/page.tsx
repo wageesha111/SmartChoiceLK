@@ -209,7 +209,7 @@ export default function AdminProductsPage() {
             <button
               key={s.id}
               onClick={() => setStatus(s.id)}
-              className={`relative rounded-full px-3.5 py-1.5 text-xs font-bold transition ${status === s.id ? 'text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+              className={`relative rounded-full px-4 py-2.5 text-xs font-bold transition ${status === s.id ? 'text-white' : 'text-slate-600 hover:bg-slate-100'}`}
             >
               {status === s.id && <motion.span layoutId="status-pill" className="absolute inset-0 rounded-full bg-gradient-to-r from-ink to-ink-700" />}
               <span className="relative">{s.label}</span>
@@ -240,7 +240,7 @@ export default function AdminProductsPage() {
       {err && <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{err}</p>}
 
       {rows && list.length > 0 && (
-        <button onClick={selectAll} className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-ink">
+        <button onClick={selectAll} className="inline-flex items-center gap-2 py-2 text-sm font-semibold text-slate-500 hover:text-ink">
           {allShownSelected ? <CheckSquare className="h-4 w-4 text-electric" /> : <Square className="h-4 w-4" />}
           {allShownSelected ? 'Clear selection' : 'Select all shown'}
         </button>
@@ -256,7 +256,7 @@ export default function AdminProductsPage() {
       )}
 
       {view === 'grid' ? (
-        <motion.ul layout className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <motion.ul layout className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 [&>*]:min-w-0">
           <AnimatePresence mode="popLayout">
             {list.map((r, i) => (
               <GridCard
