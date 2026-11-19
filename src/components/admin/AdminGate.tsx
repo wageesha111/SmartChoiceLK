@@ -17,18 +17,36 @@ import {
   Lock,
   Sparkles,
   ArrowRight,
+  MessageSquare,
+  Star,
 } from 'lucide-react';
 import { getSupabase } from '@/lib/supabase';
 import { adminIsAllowed } from '@/lib/shopProducts';
+import { adminPendingCounts } from '@/lib/shopExtras';
 import { ToastProvider } from './ui';
 
 type State = 'loading' | 'signed-out' | 'recovery' | 'not-allowed' | 'ok' | 'no-config';
 
 const NAV = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/products', label: 'Products', icon: Package },
-  { href: '/admin/new', label: 'Add product', icon: PlusCircle },
+  { href: '/admin', label: 'Dashboard', short: 'Home', icon: LayoutDashboard },
+  { href: '/admin/products', label: 'Products', short: 'Products', icon: Package },
+  { href: '/admin/new', label: 'Add product', short: 'Add', icon: PlusCircle },
+  { href: '/admin/messages', label: 'Messages', short: 'Messages', icon: MessageSquare, count: 'messages' as const },
+  { href: '/admin/reviews', label: 'Reviews', short: 'Reviews', icon: Star, count: 'reviews' as const },
 ];
+
+function Badge({ n, className = '' }: { n: number; className?: string }) {
+  if (!n) return null;
+  return (
+    <motion.span
+      initial={{ scale: 0 }}
+      animate={{ scale: 1 }}
+      className={`grid h-5 min-w-5 place-items-center rounded-full bg-gradient-to-r from-rose-500 to-fuchsia-500 px-1.5 text-[11px] font-bold text-white shadow-md shadow-rose-500/40 ${className}`}
+    >
+      {n > 99 ? '99+' : n}
+    </motion.span>
+  );
+}
 
 /** Wraps every /admin page: login, password reset, the admin check and the app shell. */
 export default function AdminGate({ children }: { children: React.ReactNode }) {
@@ -96,6 +114,17 @@ function Shell({ email, onSignOut, children }: { email: string; onSignOut: () =>
   const path = usePathname();
   const active = (href: string) => (href === '/admin' ? path === '/admin' : path.startsWith(href));
   const initial = email.charAt(0).toUpperCase() || 'A';
+  const [counts, setCounts] = useState({ messages: 0, reviews: 0 });
+  useEffect(() => {
+    const load = () => adminPendingCounts().then(setCounts).catch(() => {});
+    load();
+    const t = setInterval(load, 60_000);
+    window.addEventListener('sc-admin-counts', load);
+    return () => {
+      clearInterval(t);
+      window.removeEventListener('sc-admin-counts', load);
+    };
+  }, [path]);
 
   return (
     <div className="min-h-screen bg-[#F4F6FB] font-sans text-ink">
@@ -140,7 +169,8 @@ function Shell({ email, onSignOut, children }: { email: string; onSignOut: () =>
                   />
                 )}
                 <n.icon className="relative h-[18px] w-[18px]" />
-                <span className="relative">{n.label}</span>
+                <span className="relative flex-1">{n.label}</span>
+                {n.count && <Badge n={counts[n.count]} className="relative" />}
               </Link>
             );
           })}
@@ -202,7 +232,7 @@ function Shell({ email, onSignOut, children }: { email: string; onSignOut: () =>
         {NAV.map((n) => {
           const on = active(n.href);
           return (
-            <Link key={n.href} href={n.href} className="relative flex flex-1 flex-col items-center gap-0.5 rounded-2xl py-2 text-[11px] font-semibold">
+            <Link key={n.href} href={n.href} className="relative flex flex-1 flex-col items-center gap-0.5 rounded-2xl py-2 text-[10px] font-semibold sm:text-[11px]">
               {on && (
                 <motion.span
                   layoutId="admin-tab"
@@ -210,8 +240,11 @@ function Shell({ email, onSignOut, children }: { email: string; onSignOut: () =>
                   transition={{ type: 'spring', stiffness: 400, damping: 34 }}
                 />
               )}
-              <n.icon className={`relative h-5 w-5 ${on ? '' : 'text-white/60'}`} />
-              <span className={`relative ${on ? '' : 'text-white/60'}`}>{n.label}</span>
+              <span className="relative">
+                <n.icon className={`h-5 w-5 ${on ? '' : 'text-white/60'}`} />
+                {n.count && <Badge n={counts[n.count]} className="absolute -right-3 -top-2 h-4 min-w-4 text-[9px]" />}
+              </span>
+              <span className={`relative ${on ? '' : 'text-white/60'}`}>{n.short}</span>
             </Link>
           );
         })}

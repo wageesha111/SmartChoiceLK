@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, CartItem, User, Order } from '@/types';
 import { ALL_PRODUCTS } from '@/data/products';
 import { fetchShopProducts } from '@/lib/shopProducts';
+import { fetchRatingSummaries } from '@/lib/shopExtras';
 
 interface StoreContextType {
   products: Product[];
@@ -89,8 +90,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   // configured or can't be reached, the built-in catalog stays in place.
   const refreshProducts = async () => {
     try {
-      const live = await fetchShopProducts();
-      if (live && live.length > 0) setProducts(live);
+      const [live, ratings] = await Promise.all([fetchShopProducts(), fetchRatingSummaries().catch(() => new Map())]);
+      if (live && live.length > 0)
+        setProducts(live.map((p) => (ratings.has(p.id) ? { ...p, ...ratings.get(p.id)! } : p)));
     } catch {
       /* keep ALL_PRODUCTS */
     } finally {
