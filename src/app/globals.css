@@ -2656,3 +2656,35 @@ html[data-intro="on"] .sc-header { opacity: 0; transform: translateY(-120%); poi
   to { opacity: 1; transform: none; filter: none; }
 }
 .sc-chip-in { animation: sc-chip-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* Footer wordmark: cursor light */
+.sc-wordmark { --mx: 50%; --my: 50%; --tx: 50%; --ty: 50%; --r: 260px; }
+.sc-wordmark-fill,
+.sc-wordmark-rim,
+.sc-wordmark-glow { opacity: 0; transition: opacity .45s ease; }
+.sc-wordmark[data-lit='on'] .sc-wordmark-fill,
+.sc-wordmark[data-lit='on'] .sc-wordmark-rim,
+.sc-wordmark[data-lit='on'] .sc-wordmark-glow { opacity: 1; }
+.sc-wordmark-fill {
+  color: transparent;
+  background-image: radial-gradient(var(--r) circle at var(--tx) var(--ty),
+    rgba(255,255,255,.95) 0%, rgba(160,195,255,.75) 18%, rgba(59,111,255,.35) 42%, rgba(59,111,255,0) 70%);
+  background-attachment: scroll;
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 18px rgba(90,150,255,.35));
+}
+.sc-wordmark-rim {
+  color: transparent;
+  -webkit-text-stroke: 1.2px rgba(190,215,255,.55);
+  -webkit-mask-image: radial-gradient(calc(var(--r) * 1.6) circle at var(--tx) var(--ty), #000 0%, transparent 70%);
+  mask-image: radial-gradient(calc(var(--r) * 1.6) circle at var(--tx) var(--ty), #000 0%, transparent 70%);
+}
+.sc-wordmark-glow {
+  background: radial-gradient(calc(var(--r) * 1.4) circle at var(--mx) var(--my), rgba(59,111,255,.22), transparent 65%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 45%);
+  mask-image: linear-gradient(to bottom, transparent, #000 45%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sc-wordmark-fill, .sc-wordmark-rim, .sc-wordmark-glow { transition: none; }
+}
