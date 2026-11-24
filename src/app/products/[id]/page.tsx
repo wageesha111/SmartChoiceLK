@@ -12,7 +12,7 @@ import {
   ShieldCheck,
   Star,
   Store,
-  Wrench,
+  MessageCircle,
   Check,
   ShoppingBag,
   CreditCard,
@@ -209,7 +209,7 @@ function ProductDetail({ product }: { product: Product }) {
             <ul className="mt-6 grid gap-3 sm:grid-cols-3">
               {[
                 { icon: Store, t: 'Collect from our shop' },
-                { icon: Wrench, t: 'Installation — ask us' },
+                { icon: MessageCircle, t: 'Help on WhatsApp' },
                 { icon: ShieldCheck, t: product.warranty ? 'Brand warranty' : 'Genuine product' },
               ].map(({ icon: Icon, t }) => (
                 <li key={t} className="flex items-center gap-3 rounded-2xl p-3 ring-1 ring-slate-200">
@@ -293,7 +293,7 @@ function ProductDetail({ product }: { product: Product }) {
                       </p>
                       <p>
                         {product.warranty ? `Comes with the ${product.warranty.toLowerCase()} from the brand.` : 'Genuine product with the brand’s warranty.'}{' '}
-                        Ask us on WhatsApp about installation.
+                        Questions? Ask us on WhatsApp.
                       </p>
                     </div>
                   )}

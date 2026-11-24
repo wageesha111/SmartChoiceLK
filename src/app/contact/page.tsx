@@ -22,8 +22,8 @@ const FAQS = [
     a: 'No, we don’t deliver. Order on WhatsApp so we can confirm stock and keep it for you, then collect it from our shop in Raddoluwa, Seeduwa.',
   },
   {
-    q: 'Can you install the AC for me?',
-    a: 'Yes. Our team can install ACs and set up large appliances at your home. Installation costs depend on the unit and the piping length needed, so we’ll quote you first.',
+    q: 'Do you install ACs or other appliances?',
+    a: 'No — we sell appliances only and don’t do installation. Ask us on WhatsApp if you have questions about a model before you buy.',
   },
   {
     q: 'How does the warranty work?',
