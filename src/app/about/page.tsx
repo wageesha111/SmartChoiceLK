@@ -5,7 +5,7 @@ import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { MessageCircle, Search, Truck, Wrench, ShieldCheck, Zap, HeartHandshake, MapPin, ArrowRight } from 'lucide-react';
+import { MessageCircle, Search, Store, Wrench, ShieldCheck, Zap, HeartHandshake, MapPin, ArrowRight } from 'lucide-react';
 import SiteNavbar from '@/components/SiteNavbar';
 import SiteFooter from '@/components/SiteFooter';
 import PageHeader from '@/components/PageHeader';
@@ -19,8 +19,8 @@ if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger, useGSAP);
 const STEPS = [
   { icon: MessageCircle, n: '01', t: 'Tell us what you need', d: 'Message, call or walk in. Share your room size, family size and budget.' },
   { icon: Search, n: '02', t: 'We recommend honestly', d: 'We compare models and brands for you — including when a cheaper option is the better choice.' },
-  { icon: Truck, n: '03', t: 'Delivered to your door', d: 'Carefully packed and delivered anywhere in Sri Lanka, on a date that suits you.' },
-  { icon: Wrench, n: '04', t: 'Installed & supported', d: 'Neat installation, a quick demo, and help on WhatsApp whenever you need it later.' },
+  { icon: Store, n: '03', t: 'Collect from our shop', d: 'We keep your appliance ready at our Raddoluwa, Seeduwa shop for you to pick up.' },
+  { icon: Wrench, n: '04', t: 'Supported after you buy', d: 'Help with setup and warranty claims, and answers on WhatsApp whenever you need them.' },
 ];
 
 const VALUES = [

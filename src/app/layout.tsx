@@ -23,7 +23,7 @@ const fraunces = localFont({
 export const metadata: Metadata = {
   title: 'Smart Choice LK — Choose Smart. Live Better. | Home Electronics, Seeduwa',
   description:
-    'Smart Choice LK, Raddoluwa – Seeduwa: your one-stop shop for high-quality home electronics. Inverter ACs, refrigerators, washing machines, smart TVs and kitchen appliances with islandwide delivery. Call / WhatsApp 076 646 7854.',
+    'Smart Choice LK, Raddoluwa – Seeduwa: your one-stop shop for high-quality home electronics. Inverter ACs, refrigerators, washing machines, smart TVs and kitchen appliances. Visit and collect from our shop. Call / WhatsApp 076 646 7854.',
   keywords: [
     'Smart Choice LK',
     'Smart Choice Seeduwa',

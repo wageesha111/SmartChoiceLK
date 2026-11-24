@@ -9,17 +9,17 @@ import PageHeader from '@/components/PageHeader';
 import Reveal from '@/components/Reveal';
 import { TiltCard, BorderBeam, Magnetic } from '@/components/fx';
 import { WhatsAppIcon } from '@/components/FloatingActions';
-import { FacebookIcon } from '@/components/SiteFooter';
+import { FacebookIcon, InstagramIcon } from '@/components/SiteFooter';
 import { useStore } from '@/context/StoreContext';
 import { SITE, whatsappLink } from '@/lib/site';
 import { sendInquiry } from '@/lib/shopExtras';
 
-const TOPICS = ['Price / buying advice', 'Delivery & installation', 'Warranty or repair help', 'Bulk / business order', 'Something else'];
+const TOPICS = ['Price / buying advice', 'Stock & pickup', 'Warranty or repair help', 'Bulk / business order', 'Something else'];
 
 const FAQS = [
   {
-    q: 'Do you deliver outside Seeduwa?',
-    a: 'Yes — we deliver across Sri Lanka. Send us your town on WhatsApp and we’ll confirm the delivery date and any charges before you pay.',
+    q: 'Do you deliver?',
+    a: 'No, we don’t deliver. Order on WhatsApp so we can confirm stock and keep it for you, then collect it from our shop in Raddoluwa, Seeduwa.',
   },
   {
     q: 'Can you install the AC for me?',
@@ -97,7 +97,7 @@ export default function ContactPage() {
             Let’s find the <span className="sc-text-gradient">right one</span> for your home.
           </>
         }
-        sub="Questions about a product, delivery or installation? Message us — a real person replies."
+        sub="Questions about a product, stock or pickup? Message us — a real person replies."
         crumbs={[{ label: 'Contact' }]}
       >
         <div className="mt-8 flex flex-wrap gap-3">
@@ -219,7 +219,7 @@ export default function ContactPage() {
             </form>
           </Reveal>
 
-          {/* Map + Facebook */}
+          {/* Map + Facebook + Instagram */}
           <div className="grid gap-6">
             <Reveal delay={0.08}>
               <div className="overflow-hidden rounded-[28px] bg-white ring-1 ring-slate-200/80">
@@ -252,6 +252,21 @@ export default function ContactPage() {
                 <div className="relative">
                   <p className="font-display text-lg font-semibold">Follow us on Facebook</p>
                   <p className="text-sm text-white/75">New arrivals, price drops and offers</p>
+                </div>
+                <ArrowUpRight className="relative h-6 w-6 transition-transform group-hover:rotate-45" />
+              </a>
+            </Reveal>
+            <Reveal delay={0.2}>
+              <a
+                href={SITE.instagram}
+                target="_blank"
+                rel="noreferrer"
+                className="group relative flex items-center justify-between overflow-hidden rounded-[28px] bg-gradient-to-br from-[#F58529] via-[#DD2A7B] to-[#8134AF] p-6 text-white"
+              >
+                <InstagramIcon className="absolute -right-6 -top-6 h-32 w-32 text-white/10" />
+                <div className="relative">
+                  <p className="font-display text-lg font-semibold">Follow us on Instagram</p>
+                  <p className="text-sm text-white/80">{SITE.instagramHandle} · photos of new stock</p>
                 </div>
                 <ArrowUpRight className="relative h-6 w-6 transition-transform group-hover:rotate-45" />
               </a>

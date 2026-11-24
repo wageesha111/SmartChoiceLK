@@ -3,21 +3,19 @@
 import React from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ShieldCheck, Truck, Wrench } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ShieldCheck, Store } from 'lucide-react';
 import SiteNavbar from '@/components/SiteNavbar';
 import SiteFooter from '@/components/SiteFooter';
 import PageHeader from '@/components/PageHeader';
-import { BorderBeam, Magnetic } from '@/components/fx';
+import { BorderBeam } from '@/components/fx';
 import { WhatsAppIcon } from '@/components/FloatingActions';
 import { useStore } from '@/context/StoreContext';
-import { SITE, whatsappLink } from '@/lib/site';
+import { SITE, cartOrderMessage, whatsappLink } from '@/lib/site';
 
 export default function CartPage() {
   const { cart, cartCount, subtotal, changeQty, removeFromCart, clearCart, formatLKR } = useStore();
 
-  const orderMsg = `Hello ${SITE.name}! I'd like to order:\n\n${cart
-    .map((it, i) => `${i + 1}. ${it.name} x${it.qty} — ${formatLKR(it.price * it.qty)}`)
-    .join('\n')}\n\nSubtotal: ${formatLKR(subtotal)}\n\nPlease confirm stock and the delivery date to my area.`;
+  const orderMsg = cartOrderMessage(cart, subtotal, formatLKR);
 
   return (
     <div className="bg-mist font-sans text-ink antialiased">
@@ -25,7 +23,7 @@ export default function CartPage() {
       <PageHeader
         eyebrow="Your cart"
         title={cartCount ? `${cartCount} item${cartCount > 1 ? 's' : ''} in your cart` : 'Your cart is empty'}
-        sub={cartCount ? 'Review your items, then send the order to us on WhatsApp — we’ll confirm stock, delivery date and payment.' : undefined}
+        sub={cartCount ? 'Review your items, then send the order to us on WhatsApp — we’ll confirm stock and payment, then you collect it from our shop.' : undefined}
         crumbs={[{ label: 'Cart' }]}
       />
 
@@ -113,31 +111,28 @@ export default function CartPage() {
                       <dd>{formatLKR(subtotal)}</dd>
                     </div>
                     <div className="flex justify-between text-white/70">
-                      <dt>Delivery & installation</dt>
-                      <dd>Confirmed on WhatsApp</dd>
+                      <dt>Pickup</dt>
+                      <dd>From our Seeduwa shop</dd>
                     </div>
                   </dl>
                   <div className="mt-5 flex items-end justify-between border-t border-white/10 pt-5">
-                    <span className="text-white/70">Subtotal</span>
+                    <span className="text-white/70">Total</span>
                     <span className="font-display text-3xl font-bold">{formatLKR(subtotal)}</span>
                   </div>
-                  <Magnetic strength={0.15}>
                     <a
                       href={whatsappLink(orderMsg)}
                       target="_blank"
                       rel="noreferrer"
                       className="sc-shimmer mt-7 flex w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-4 font-bold"
                     >
-                      <WhatsAppIcon /> Send order on WhatsApp
+                      <WhatsAppIcon /> Checkout via WhatsApp
                     </a>
-                  </Magnetic>
-                  <p className="mt-3 text-center text-xs text-white/45">No payment now — we’ll confirm everything with you first.</p>
+                  <p className="mt-3 text-center text-xs text-white/45">No payment now — we confirm stock on WhatsApp, then you collect from our shop.</p>
                 </div>
               </div>
               <ul className="mt-4 space-y-2 text-sm">
                 {[
-                  { icon: Truck, t: 'Delivery anywhere in Sri Lanka' },
-                  { icon: Wrench, t: 'Installation available' },
+                  { icon: Store, t: `Collect from our shop — ${SITE.address}` },
                   { icon: ShieldCheck, t: 'Genuine products, brand warranty' },
                 ].map(({ icon: Icon, t }) => (
                   <li key={t} className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 ring-1 ring-slate-200/80">

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Wrench, Truck, ShieldCheck, Zap, CreditCard, Headphones } from 'lucide-react';
+import { Wrench, Store, ShieldCheck, Zap, CreditCard, Headphones } from 'lucide-react';
 import Reveal, { SectionHeading } from '@/components/Reveal';
 
 const FEATURES = [
@@ -13,14 +13,14 @@ const FEATURES = [
     accent: true,
   },
   {
-    icon: Truck,
-    title: 'Islandwide delivery',
-    desc: 'Carefully packed and delivered to your doorstep, anywhere in Sri Lanka.',
+    icon: Store,
+    title: 'Visit & collect',
+    desc: 'See it in person at our Raddoluwa, Seeduwa shop and take it home.',
   },
   {
     icon: Wrench,
-    title: 'Proper installation',
-    desc: 'Clean, correct installation and a full demo before we leave.',
+    title: 'Setup help',
+    desc: 'We show you how it works and help with setup questions on WhatsApp.',
   },
   {
     icon: ShieldCheck,

@@ -224,7 +224,7 @@ function Catalog() {
       <PageHeader
         eyebrow="Shop"
         title={catName ?? 'All appliances'}
-        sub="Genuine brands, fair prices, delivered and installed anywhere in Sri Lanka."
+        sub="Genuine brands at fair prices. Order on WhatsApp and collect from our Seeduwa shop."
         crumbs={catName ? [{ label: 'Shop', href: '/products' }, { label: catName }] : [{ label: 'Shop' }]}
       >
         {/* Search */}

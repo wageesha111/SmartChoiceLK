@@ -1,13 +1,13 @@
 'use client';
 
 import React from 'react';
-import { Truck, ShieldCheck, Wrench, CreditCard } from 'lucide-react';
+import { Store, ShieldCheck, Wrench, CreditCard } from 'lucide-react';
 
 export const TRUST_ITEMS = [
-  { icon: Truck, title: 'Islandwide delivery', desc: 'Safe delivery to all 25 districts' },
+  { icon: Store, title: 'Shop pickup', desc: 'Collect from our Seeduwa store' },
   { icon: ShieldCheck, title: 'Genuine warranty', desc: 'Original products, brand-backed' },
-  { icon: Wrench, title: 'Expert installation', desc: 'Neat setup by trained technicians' },
-  { icon: CreditCard, title: 'Easy payments', desc: 'Card installments & cash on delivery' },
+  { icon: Wrench, title: 'Installation help', desc: 'Ask us about setting it up' },
+  { icon: CreditCard, title: 'Easy payments', desc: 'Cash, card & installment plans' },
 ];
 
 export default function TrustRibbon() {

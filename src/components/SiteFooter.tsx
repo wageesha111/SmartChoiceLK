@@ -15,6 +15,16 @@ export function FacebookIcon({ className = 'w-5 h-5' }: { className?: string }) 
   );
 }
 
+export function InstagramIcon({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" />
+      <circle cx="12" cy="12" r="4.25" />
+      <circle cx="17.6" cy="6.4" r="1.1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 const SHOP = [
   { name: 'Air Conditioners', url: '/products?category=air-conditioners' },
   { name: 'Refrigerators', url: '/products?category=refrigerators' },
@@ -26,7 +36,7 @@ const SHOP = [
 const HELP = [
   { name: 'About Smart Choice', url: '/about' },
   { name: 'Contact & Directions', url: '/contact' },
-  { name: 'Delivery & Installation', url: '/contact' },
+  { name: 'Visit Our Shop', url: '/contact' },
   { name: 'Warranty Support', url: '/contact' },
   { name: 'My Cart', url: '/cart' },
 ];
@@ -82,6 +92,15 @@ export default function SiteFooter() {
                 className="grid h-11 w-11 place-items-center rounded-full border border-white/10 bg-white/5 transition-colors hover:bg-[#1877F2]"
               >
                 <FacebookIcon className="h-[18px] w-[18px]" />
+              </a>
+              <a
+                href={SITE.instagram}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Instagram"
+                className="grid h-11 w-11 place-items-center rounded-full border border-white/10 bg-white/5 transition-colors hover:bg-gradient-to-br hover:from-[#F58529] hover:via-[#DD2A7B] hover:to-[#8134AF]"
+              >
+                <InstagramIcon className="h-[18px] w-[18px]" />
               </a>
               <a
                 href={whatsappLink()}

@@ -18,7 +18,7 @@ const LABELS = [
   'Smart TVs',
   'Kitchen',
   'Home Comfort',
-  'Islandwide Delivery',
+  'Shop Pickup',
   'Installation',
   'Brand Warranty',
   'Honest Advice',

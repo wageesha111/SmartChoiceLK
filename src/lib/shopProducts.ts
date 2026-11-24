@@ -70,6 +70,14 @@ export function plainImage(raw: string, size = 1000): string {
 
 const MODEL3D = new Set(['ac', 'fridge', 'washer', 'tv']);
 
+/** A JPEG on white for WhatsApp/Facebook link previews (they handle transparent WebP poorly). */
+export function previewImage(raw: string | null | undefined, cutout: boolean, size = 800): string {
+  return displayImage(raw, cutout, size)
+    .replace(/b_transparent/g, 'b_white')
+    .replace(/f_webp/g, 'f_jpg')
+    .replace(/\.(webp|png)$/i, '.jpg');
+}
+
 export function rowToProduct(r: ShopProductRow): Product {
   const main = displayImage(r.image, r.cutout);
   return {

@@ -44,12 +44,13 @@ const QUICK_CATS = [
 ];
 
 const ANNOUNCEMENTS = [
-  'Islandwide delivery to all 25 districts',
+  'Visit & collect at our Seeduwa shop',
   `Call or WhatsApp ${SITE.phoneDisplay}`,
   'Genuine products with brand warranty',
   'Easy installment plans available',
   `Visit us at ${SITE.address}`,
   `${SITE.facebookRecommend} recommended on Facebook`,
+  `Follow us on Instagram ${SITE.instagramHandle}`,
 ];
 
 function useActiveLink() {
