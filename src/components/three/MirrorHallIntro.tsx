@@ -19,7 +19,7 @@ const LABELS = [
   'Kitchen',
   'Home Comfort',
   'Shop Pickup',
-  'Installation',
+  'Fair Prices',
   'Brand Warranty',
   'Honest Advice',
   'Seeduwa',

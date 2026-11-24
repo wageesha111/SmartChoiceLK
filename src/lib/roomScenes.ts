@@ -66,7 +66,7 @@ export const ROOM_SCENES: RoomScene[] = [
     eyebrow: 'Smart TVs',
     title: 'Every match.',
     accent: 'Every movie.',
-    line: 'Big, bright smart TVs with brand warranty and wall-mount installation.',
+    line: 'Big, bright smart TVs with brand warranty.',
     image: '/appliances/luxury-tv.jpg',
     size: [1376, 768],
     focal: '40% 45%',

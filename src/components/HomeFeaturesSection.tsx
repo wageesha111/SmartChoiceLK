@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Wrench, Store, ShieldCheck, Zap, CreditCard, Headphones } from 'lucide-react';
+import { Tag, Store, ShieldCheck, Zap, CreditCard, Headphones } from 'lucide-react';
 import Reveal, { SectionHeading } from '@/components/Reveal';
 
 const FEATURES = [
@@ -18,9 +18,9 @@ const FEATURES = [
     desc: 'See it in person at our Raddoluwa, Seeduwa shop and take it home.',
   },
   {
-    icon: Wrench,
-    title: 'Setup help',
-    desc: 'We show you how it works and help with setup questions on WhatsApp.',
+    icon: Tag,
+    title: 'Fair prices',
+    desc: 'Honest prices on genuine brands. Ask us on WhatsApp for today’s best price.',
   },
   {
     icon: ShieldCheck,
@@ -54,7 +54,7 @@ export default function HomeFeaturesSection() {
               <span className="text-[#8a8275]">made simple.</span>
             </>
           }
-          sub="From choosing the right model to installation at home, we take care of everything — the way a good local shop should."
+          sub="From choosing the right model to taking it home, we help you every step — the way a good local shop should."
         />
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

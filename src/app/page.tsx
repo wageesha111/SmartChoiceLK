@@ -139,7 +139,7 @@ export default function SmartChoiceHomePage() {
 
         <div className="relative mx-auto max-w-[1280px] px-5">
           <ScrubText
-            text="Inverter technology, honest advice and proper installation — so your home runs cooler, quieter and cheaper."
+            text="Inverter technology, honest advice and fair prices — so your home runs cooler, quieter and cheaper."
             className="mb-20 max-w-5xl font-display text-3xl font-semibold leading-[1.15] tracking-tight sm:text-5xl lg:text-6xl"
           />
           <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.1fr]">

@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Store, ShieldCheck, Wrench, CreditCard } from 'lucide-react';
+import { Store, ShieldCheck, Tag, CreditCard } from 'lucide-react';
 
 export const TRUST_ITEMS = [
   { icon: Store, title: 'Shop pickup', desc: 'Collect from our Seeduwa store' },
   { icon: ShieldCheck, title: 'Genuine warranty', desc: 'Original products, brand-backed' },
-  { icon: Wrench, title: 'Installation help', desc: 'Ask us about setting it up' },
+  { icon: Tag, title: 'Fair prices', desc: 'Honest prices on genuine brands' },
   { icon: CreditCard, title: 'Easy payments', desc: 'Cash, card & installment plans' },
 ];
 
