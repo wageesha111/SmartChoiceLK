@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowRight, ChevronDown } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { ROOM_SCENES, sceneFromProgress, resolveHotspot, coverPoint } from '@/lib/roomScenes';
 import { useStore } from '@/context/StoreContext';
 import { TRUST_ITEMS } from '@/components/TrustRibbon';
@@ -129,8 +129,6 @@ export default function RoomHero() {
     const total = section.offsetHeight - window.innerHeight;
     window.scrollTo({ top: top + (i / (N - 1)) * total, behavior: 'smooth' });
   };
-
-  const skipToShop = () => document.getElementById('categories-section')?.scrollIntoView({ behavior: 'smooth' });
 
   const scene = ROOM_SCENES[shown];
 
@@ -273,13 +271,6 @@ export default function RoomHero() {
               </button>
             ))}
           </div>
-          <button
-            type="button"
-            onClick={skipToShop}
-            className="absolute right-4 top-[calc(50%+76px)] z-[6] hidden items-center gap-1 rounded-full border border-white/15 bg-white/[0.06] px-3.5 py-1.5 text-xs font-bold text-white/75 backdrop-blur-md transition-colors hover:bg-white/15 hover:text-white sm:inline-flex sm:right-7"
-          >
-            Skip to shop <ChevronDown className="h-3.5 w-3.5" />
-          </button>
 
           {/* Reduced motion: tap to switch rooms */}
           {reduced && (

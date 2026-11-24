@@ -693,7 +693,7 @@ export default function MirrorHallIntro() {
 
         {/* Bottom: building word, label, dots */}
         <div ref={bottomRef} className="pointer-events-none absolute inset-x-0 bottom-[92px] text-center text-white sm:bottom-[84px]">
-          <p aria-label="Smart Choice" className="relative inline-block font-display text-5xl font-light tracking-[0.16em] sm:text-7xl xl:text-[5.5rem]">
+          <p aria-label="Smart Choice" className="relative inline-block whitespace-nowrap font-display text-[clamp(1.75rem,8.6vw,3rem)] font-light tracking-[0.12em] sm:text-7xl sm:tracking-[0.16em] xl:text-[5.5rem]">
             {word.split('').map((ch, i) => {
               const letterIdx = word.slice(0, i + 1).replace(/ /g, '').length; // 1-based among letters
               const on = ch === ' ' || letterIdx <= shown;
