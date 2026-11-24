@@ -7,7 +7,6 @@ import { useStore } from '@/context/StoreContext';
 import { whatsappLink } from '@/lib/site';
 import { WhatsAppIcon } from '@/components/FloatingActions';
 import type { Product } from '@/types';
-import { TiltCard } from '@/components/fx';
 
 const CAT_LABEL: Record<string, string> = {
   'air-conditioners': 'Air Conditioner',
@@ -25,8 +24,7 @@ export default function ProductCard({ product, tone = 'default' }: { product: Pr
   const benefit = product.badge ?? product.features?.[0];
 
   return (
-    <TiltCard max={6} glare={false} scale={1.015} className="h-full rounded-[26px]">
-    <article className={`group relative flex h-full flex-col rounded-[26px] p-2.5 ring-1 transition-shadow duration-500 hover:shadow-[0_30px_60px_-30px_rgba(14,31,68,0.35)] hover:ring-electric/30 ${stone ? 'bg-warm-linen ring-[#e2dbd0]' : 'bg-white ring-slate-200/70'}`}>
+    <article className={`group relative flex h-full flex-col rounded-[26px] p-2.5 ring-1 transition-[box-shadow,--tw-ring-color] duration-500 hover:shadow-[0_30px_60px_-30px_rgba(14,31,68,0.35)] hover:ring-electric/30 ${stone ? 'bg-warm-linen ring-[#e2dbd0]' : 'bg-white ring-slate-200/70'}`}>
       {/* Media */}
       <div className={`relative aspect-[4/3.4] overflow-hidden ${stone ? 'rounded-[22px] bg-warm-sand' : 'rounded-[20px] bg-gradient-to-br from-slate-100 to-slate-200'}`}>
         <Link href={`/products/${product.id}`} className="absolute inset-0">
@@ -111,13 +109,12 @@ export default function ProductCard({ product, tone = 'default' }: { product: Pr
           <button
             onClick={() => addToCart(product.id, 1)}
             aria-label="Add to cart"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ink text-white transition-all duration-300 hover:rotate-90 hover:bg-electric"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ink text-white transition-colors duration-200 hover:bg-electric active:bg-electric-600 [&>svg]:transition-transform [&>svg]:duration-300 hover:[&>svg]:rotate-90"
           >
             <Plus className="h-5 w-5" />
           </button>
         </div>
       </div>
     </article>
-    </TiltCard>
   );
 }
