@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Metadata, Viewport } from 'next';
-import { Fraunces } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 import { StoreProvider } from '@/context/StoreContext';
 import GlobalDrawers from '@/components/GlobalDrawers';
@@ -8,7 +8,17 @@ import FloatingActions from '@/components/FloatingActions';
 import SiteAnalytics from '@/components/SiteAnalytics';
 import { SITE_URL } from '@/lib/siteUrl';
 
-const fraunces = Fraunces({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-serif', display: 'swap' });
+// Fraunces is bundled with the site (SIL OFL) instead of fetched from Google Fonts at build time,
+// so a Google Fonts hiccup can no longer fail the Vercel build.
+const fraunces = localFont({
+  src: [
+    { path: './fonts/fraunces-latin-400-normal.woff2', weight: '400', style: 'normal' },
+    { path: './fonts/fraunces-latin-500-normal.woff2', weight: '500', style: 'normal' },
+    { path: './fonts/fraunces-latin-600-normal.woff2', weight: '600', style: 'normal' },
+  ],
+  variable: '--font-serif',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'Smart Choice LK — Choose Smart. Live Better. | Home Electronics, Seeduwa',
