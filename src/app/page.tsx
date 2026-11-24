@@ -16,6 +16,7 @@ import SiteNavbar from '@/components/SiteNavbar';
 import SiteFooter, { FacebookIcon } from '@/components/SiteFooter';
 import RoomHero from '@/components/home/RoomHero';
 import ShopByRoom from '@/components/home/ShopByRoom';
+import SkipIntroButton from '@/components/home/SkipIntroButton';
 import HomeFeaturesSection from '@/components/HomeFeaturesSection';
 import EnergyCalculator from '@/components/EnergyCalculator';
 import ProductCard from '@/components/ProductCard';
@@ -62,6 +63,7 @@ export default function SmartChoiceHomePage() {
 
       {/* ───────────────── INTRO: Mirror Hall card ring ───────────────── */}
       <MirrorHallIntro />
+      <SkipIntroButton />
 
       {/* ───────────────── HERO: scroll through the rooms ───────────────── */}
       <RoomHero />
