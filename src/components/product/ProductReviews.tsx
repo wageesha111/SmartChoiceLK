@@ -155,7 +155,7 @@ export default function ProductReviews({ productId, productName }: { productId: 
                   </label>
                   <label className="block">
                     <span className="mb-2 block text-sm font-semibold">Your review <span className="font-normal text-slate-400">(optional)</span></span>
-                    <textarea className={`${field} min-h-[110px] resize-none`} value={comment} onChange={(e) => setComment(e.target.value)} maxLength={1500} placeholder="How is it working? Delivery, installation, performance…" />
+                    <textarea className={`${field} min-h-[110px] resize-none`} value={comment} onChange={(e) => setComment(e.target.value)} maxLength={1500} placeholder="How is it working? Performance, quality, our service…" />
                   </label>
                 </div>
                 {err && <p className="mt-3 text-sm text-rose-600">{err}</p>}

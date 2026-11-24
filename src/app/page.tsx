@@ -13,7 +13,7 @@ import {
   Star,
 } from 'lucide-react';
 import SiteNavbar from '@/components/SiteNavbar';
-import SiteFooter, { FacebookIcon } from '@/components/SiteFooter';
+import SiteFooter, { FacebookIcon, InstagramIcon } from '@/components/SiteFooter';
 import RoomHero from '@/components/home/RoomHero';
 import ShopByRoom from '@/components/home/ShopByRoom';
 import SkipIntroButton from '@/components/home/SkipIntroButton';
@@ -283,14 +283,24 @@ export default function SmartChoiceHomePage() {
                 Join {SITE.facebookFollowers} people who follow Smart Choice LK for new arrivals, price drops and special
                 offers.
               </p>
-              <a
-                href={SITE.facebook}
-                target="_blank"
-                rel="noreferrer"
-                className="relative mt-8 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-bold text-[#1877F2] transition-transform hover:-translate-y-0.5"
-              >
-                <FacebookIcon className="h-4 w-4" /> Follow & read reviews
-              </a>
+              <div className="relative mt-8 flex flex-wrap gap-3">
+                <a
+                  href={SITE.facebook}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-bold text-[#1877F2] transition-transform hover:-translate-y-0.5"
+                >
+                  <FacebookIcon className="h-4 w-4" /> Follow & read reviews
+                </a>
+                <a
+                  href={SITE.instagram}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full bg-white/15 px-6 py-3.5 text-sm font-bold text-white ring-1 ring-white/30 transition-transform hover:-translate-y-0.5"
+                >
+                  <InstagramIcon className="h-4 w-4" /> Instagram
+                </a>
+              </div>
             </div>
           </Reveal>
           <Reveal delay={0.08}>

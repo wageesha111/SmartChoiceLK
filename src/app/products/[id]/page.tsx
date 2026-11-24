@@ -11,7 +11,7 @@ import {
   Plus,
   ShieldCheck,
   Star,
-  Truck,
+  Store,
   Wrench,
   Check,
   ShoppingBag,
@@ -29,13 +29,13 @@ import { Magnetic } from '@/components/fx';
 import { WhatsAppIcon } from '@/components/FloatingActions';
 import { useStore } from '@/context/StoreContext';
 import { CATEGORIES } from '@/data/products';
-import { SITE, whatsappLink } from '@/lib/site';
+import { SITE, cartOrderMessage, whatsappLink } from '@/lib/site';
 import type { Product } from '@/types';
 
 const TABS = [
   { id: 'overview', label: 'Overview' },
   { id: 'specs', label: 'Specifications' },
-  { id: 'delivery', label: 'Delivery & installation' },
+  { id: 'delivery', label: 'Pickup & warranty' },
 ] as const;
 type Tab = (typeof TABS)[number]['id'];
 
@@ -80,9 +80,7 @@ function ProductDetail({ product }: { product: Product }) {
   ).slice(0, 4);
   const save = product.originalPrice ? product.originalPrice - product.price : 0;
 
-  const orderMsg = `Hello ${SITE.name}! I'd like to order: ${product.name}${product.sku ? ` (SKU ${product.sku})` : ''} x${qty} — ${formatLKR(
-    product.price * qty
-  )}. Can you confirm stock and delivery to my area?`;
+  const orderMsg = cartOrderMessage([{ id: product.id, name: product.name, qty, price: product.price }], product.price * qty, formatLKR);
 
   return (
     <div className="bg-white font-sans text-ink antialiased">
@@ -210,8 +208,8 @@ function ProductDetail({ product }: { product: Product }) {
 
             <ul className="mt-6 grid gap-3 sm:grid-cols-3">
               {[
-                { icon: Truck, t: 'Islandwide delivery' },
-                { icon: Wrench, t: 'Expert installation' },
+                { icon: Store, t: 'Collect from our shop' },
+                { icon: Wrench, t: 'Installation — ask us' },
                 { icon: ShieldCheck, t: product.warranty ? 'Brand warranty' : 'Genuine product' },
               ].map(({ icon: Icon, t }) => (
                 <li key={t} className="flex items-center gap-3 rounded-2xl p-3 ring-1 ring-slate-200">
@@ -290,12 +288,12 @@ function ProductDetail({ product }: { product: Product }) {
                     <div className="space-y-4 text-sm leading-relaxed text-slate-600">
                       {product.deliveryInfo && <p>{product.deliveryInfo}</p>}
                       <p>
-                        We deliver across all 25 districts. For ACs and large appliances our team can install and demo
-                        the unit at your home. Message us on WhatsApp with your town for a delivery date and any
-                        installation charges.
+                        We don’t deliver. Order on WhatsApp so we can confirm stock and keep it for you, then collect it
+                        from our shop at {SITE.address} ({SITE.hours.toLowerCase()}).
                       </p>
                       <p>
-                        Prefer to see it first? Visit the shop at {SITE.address} — {SITE.hours.toLowerCase()}.
+                        {product.warranty ? `Comes with the ${product.warranty.toLowerCase()} from the brand.` : 'Genuine product with the brand’s warranty.'}{' '}
+                        Ask us on WhatsApp about installation.
                       </p>
                     </div>
                   )}

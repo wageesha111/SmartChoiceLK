@@ -24,7 +24,7 @@ export const ROOM_SCENES: RoomScene[] = [
     eyebrow: 'Inverter Air Conditioners',
     title: 'Cool rooms.',
     accent: 'Lower bills.',
-    line: 'Inverter ACs delivered and installed across Sri Lanka from our shop in Seeduwa.',
+    line: 'Genuine inverter ACs from our shop in Raddoluwa, Seeduwa.',
     image: '/appliances/luxury-ac.jpg',
     size: [1376, 768],
     focal: '50% 30%',

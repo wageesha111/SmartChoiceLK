@@ -80,12 +80,12 @@ export const FAQ_ITEMS = [
     answer: 'Yes, every appliance sold at Smart Choice LK is 100% genuine, brand-new, and comes with authorized manufacturer agent warranties (including 10 to 20-year compressor and motor warranties on inverter models). Official warranty cards are issued upon delivery.',
   },
   {
-    question: 'How does islandwide delivery and installation work in Sri Lanka?',
-    answer: 'We provide same-day or next-day express delivery across Colombo and Gampaha districts, and 2-3 business days delivery to all 25 districts across Sri Lanka. For Air Conditioners and large appliances, professional certified installation by trained technicians can be scheduled upon checkout.',
+    question: 'Do you deliver?',
+    answer: 'No. Order on WhatsApp so we can confirm stock and keep it for you, then collect it from our shop in Raddoluwa, Seeduwa.',
   },
   {
     question: 'What payment methods and installment options are available?',
-    answer: 'We accept Cash on Delivery (COD) in eligible areas, Credit & Debit Cards (Visa, MasterCard), Online Bank Transfers, and 0% interest credit card installment plans up to 36 months with leading Sri Lankan commercial banks.',
+    answer: 'We accept cash, Credit & Debit Cards (Visa, MasterCard), Online Bank Transfers, and 0% interest credit card installment plans up to 36 months with leading Sri Lankan commercial banks.',
   },
   {
     question: 'How much can I save on my electricity bill by switching to an Inverter appliance?',

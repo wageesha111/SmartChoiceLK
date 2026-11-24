@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useStore } from '@/context/StoreContext';
+import { WhatsAppIcon } from '@/components/FloatingActions';
+import { cartOrderMessage, whatsappLink } from '@/lib/site';
 
 export default function GlobalDrawers() {
   const {
@@ -95,7 +97,7 @@ export default function GlobalDrawers() {
                     Appliance Cart ({cartCount})
                   </h3>
                   <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                    Islandwide Delivery & Agent Warranties
+                    Genuine brands · Collect from our Seeduwa shop
                   </span>
                 </div>
               </div>
@@ -115,29 +117,6 @@ export default function GlobalDrawers() {
               >
                 ✕
               </button>
-            </div>
-
-            {/* Delivery Incentive Banner */}
-            <div
-              style={{
-                backgroundColor: subtotal >= 100000 ? '#f0fdf4' : '#eff6ff',
-                border: `1px solid ${subtotal >= 100000 ? '#bbf7d0' : '#bfdbfe'}`,
-                padding: '10px 14px',
-                borderRadius: '8px',
-                fontSize: '0.8125rem',
-                color: subtotal >= 100000 ? '#166534' : '#1e40af',
-                marginBottom: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
-              <span>{subtotal >= 100000 ? '🎉' : '🚚'}</span>
-              <span>
-                {subtotal >= 100000
-                  ? 'Congratulations! You qualify for FREE Islandwide Safe Delivery.'
-                  : `Add ${formatLKR(100000 - subtotal)} more to enjoy FREE Islandwide Delivery!`}
-              </span>
             </div>
 
             {/* Cart Items List */}
@@ -318,13 +297,17 @@ export default function GlobalDrawers() {
                   </span>
                 </div>
 
-                <Link
-                  href="/cart"
-                  onClick={() => setIsCartOpen(false)}
+                <a
+                  href={whatsappLink(cartOrderMessage(cart, subtotal, formatLKR))}
+                  target="_blank"
+                  rel="noreferrer"
                   style={{
-                    display: 'block',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
                     width: '100%',
-                    padding: '13px',
+                    padding: '14px',
                     backgroundColor: '#266bf9',
                     color: '#ffffff',
                     fontWeight: 700,
@@ -333,38 +316,14 @@ export default function GlobalDrawers() {
                     textAlign: 'center',
                     textDecoration: 'none',
                     boxShadow: '0 4px 14px rgba(38,107,249,0.3)',
-                    marginBottom: '10px',
                   }}
                 >
-                  View Full Cart & Checkout →
-                </Link>
-
-                <a
-                  href={`https://wa.me/94766467854?text=${encodeURIComponent(
-                    `Hello Smart Choice LK! I have ${cartCount} items in my cart totaling ${formatLKR(
-                      subtotal
-                    )}. I'd like to confirm the order.`
-                  )}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    width: '100%',
-                    padding: '11px',
-                    backgroundColor: '#f0fdf4',
-                    color: '#15803d',
-                    border: '1px solid #bbf7d0',
-                    fontWeight: 700,
-                    borderRadius: '50px',
-                    fontSize: '0.875rem',
-                    textDecoration: 'none',
-                  }}
-                >
-                  <span>💬 Fast Order via WhatsApp</span>
+                  <WhatsAppIcon className="h-5 w-5" />
+                  Checkout via WhatsApp
                 </a>
+                <p style={{ marginTop: '10px', textAlign: 'center', fontSize: '0.75rem', color: '#64748b' }}>
+                  No payment now — we confirm stock on WhatsApp, then you collect from our shop.
+                </p>
               </div>
             )}
           </div>
