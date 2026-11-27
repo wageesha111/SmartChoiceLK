@@ -16,7 +16,7 @@ import SiteNavbar from '@/components/SiteNavbar';
 import SiteFooter, { FacebookIcon, InstagramIcon } from '@/components/SiteFooter';
 import RoomHero from '@/components/home/RoomHero';
 import ShopByRoom from '@/components/home/ShopByRoom';
-import SkipIntroButton from '@/components/home/SkipIntroButton';
+import SmokeHero from '@/components/home/SmokeHero';
 import HomeFeaturesSection from '@/components/HomeFeaturesSection';
 import EnergyCalculator from '@/components/EnergyCalculator';
 import ProductCard from '@/components/ProductCard';
@@ -24,7 +24,6 @@ import Reveal, { SectionHeading } from '@/components/Reveal';
 import { WhatsAppIcon } from '@/components/FloatingActions';
 import { BorderBeam, Spotlight, ScrubText } from '@/components/fx';
 
-import MirrorHallIntro from '@/components/three/MirrorHallIntro';
 import { useStore } from '@/context/StoreContext';
 import { SMARTCHOICE_BLOGS } from '@/data/smartchoice-data';
 import { SITE, whatsappLink } from '@/lib/site';
@@ -61,9 +60,8 @@ export default function SmartChoiceHomePage() {
     <div className="bg-white font-sans text-ink antialiased">
       <SiteNavbar />
 
-      {/* ───────────────── INTRO: Mirror Hall card ring ───────────────── */}
-      <MirrorHallIntro />
-      <SkipIntroButton />
+      {/* ───────────────── OPENING: night room, smoke, doors open on scroll ───────────────── */}
+      <SmokeHero />
 
       {/* ───────────────── HERO: scroll through the rooms ───────────────── */}
       <RoomHero />
