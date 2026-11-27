@@ -185,34 +185,33 @@ export default function SmokeHero() {
       if (parts.length >= MAX) parts.shift();
       parts.push({
         x, y, vx, vy,
-        r: (30 + Math.random() * 26) * big,
-        gr: 0.3 + Math.random() * 0.35,
+        r: (34 + Math.random() * 30) * big,
+        gr: 0.4 + Math.random() * 0.4,
         rot: Math.random() * Math.PI * 2,
         vr: (Math.random() - 0.5) * 0.01,
         t: 0,
-        life: 140 + Math.random() * 100,
+        life: 150 + Math.random() * 110,
         a: alpha * (0.75 + Math.random() * 0.5),
       });
     };
 
-    // where the pointer is: smoke keeps rising from there, even while it rests
-    const src = { x: 0, y: 0, vx: 0, vy: 0, on: false };
+    let last: { x: number; y: number } | null = null;
     const onMove = (e: PointerEvent) => {
+      if (openRef.current > 0.6) return;
       const rect = canvas.getBoundingClientRect();
       const x = (e.clientX - rect.left) * SCALE;
       const y = (e.clientY - rect.top) * SCALE;
-      const inside = x >= 0 && x <= W && y >= 0 && y <= H;
-      if (src.on && inside) {
-        src.vx = src.vx * 0.6 + (x - src.x) * 0.4;
-        src.vy = src.vy * 0.6 + (y - src.y) * 0.4;
+      if (y < 0 || y > H) return;
+      if (!last) last = { x, y };
+      const dx = x - last.x;
+      const dy = y - last.y;
+      const steps = Math.min(6, Math.floor(Math.hypot(dx, dy) / 9));
+      for (let i = 1; i <= steps; i++) {
+        spawn(last.x + (dx * i) / steps, last.y + (dy * i) / steps, dx * 0.04 + (Math.random() - 0.5) * 0.4, dy * 0.04 - 0.15, 1, 0.17);
       }
-      src.x = x;
-      src.y = y;
-      src.on = inside;
+      if (steps) last = { x, y };
     };
-    const onLeave = () => (src.on = false);
     window.addEventListener('pointermove', onMove, { passive: true });
-    document.addEventListener('pointerleave', onLeave);
 
     let visible = true;
     const io = new IntersectionObserver(([en]) => (visible = en.isIntersecting));
@@ -231,19 +230,6 @@ export default function SmokeHero() {
         const side = Math.random() < 0.5;
         spawn(side ? -20 : W + 20, H * (0.6 + Math.random() * 0.35), side ? 0.4 + Math.random() * 0.3 : -0.4 - Math.random() * 0.3, -0.1, 1.4, 0.08);
       }
-      // a steady curl of smoke from the pointer
-      if (src.on && openRef.current < 0.5 && tick % 4 === 0) {
-        spawn(
-          src.x + (Math.random() - 0.5) * 12,
-          src.y + (Math.random() - 0.5) * 8,
-          src.vx * 0.1 + (Math.random() - 0.5) * 0.4,
-          src.vy * 0.1 - 0.6 - Math.random() * 0.45,
-          0.55,
-          0.13,
-        );
-      }
-      src.vx *= 0.9;
-      src.vy *= 0.9;
       ctx.clearRect(0, 0, W, H);
       for (let i = parts.length - 1; i >= 0; i--) {
         const p = parts[i];
@@ -252,7 +238,7 @@ export default function SmokeHero() {
           parts.splice(i, 1);
           continue;
         }
-        p.x += p.vx + Math.sin((p.t + p.rot * 40) * 0.035) * 0.18;
+        p.x += p.vx;
         p.y += p.vy;
         p.vx *= 0.985;
         p.vy = p.vy * 0.985 - 0.006;
@@ -272,7 +258,6 @@ export default function SmokeHero() {
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener('pointermove', onMove);
-      document.removeEventListener('pointerleave', onLeave);
       io.disconnect();
       ro.disconnect();
     };
