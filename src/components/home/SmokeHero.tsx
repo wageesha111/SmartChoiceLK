@@ -33,7 +33,10 @@ function Face({ copy }: { copy?: boolean }) {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_55%,rgba(5,11,26,0.25),rgba(5,11,26,0.82)_70%)]" />
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(5,11,26,0.75),transparent_28%,transparent_62%,rgba(5,11,26,0.9))]" />
 
-      <div className="relative flex h-full flex-col items-center justify-center px-6 text-center text-white">
+      <div
+        className="relative flex h-full flex-col items-center justify-center px-6 text-center text-white"
+        style={{ opacity: 'calc(1 - var(--words, 0))', transform: 'translateY(calc(var(--words, 0) * -24px))' }}
+      >
         <p className="sc-hero-in text-[11px] font-semibold uppercase tracking-[0.42em] text-white/65 sm:text-xs">
           Smart Choice LK · Raddoluwa, Seeduwa
         </p>
@@ -69,8 +72,8 @@ function makePuff(size = 192) {
     const y = size / 2 + Math.sin(a) * d;
     const r = size * (0.08 + Math.random() * 0.2);
     const rg = g.createRadialGradient(x, y, 0, x, y, r);
-    rg.addColorStop(0, 'rgba(214,228,245,0.14)');
-    rg.addColorStop(1, 'rgba(214,228,245,0)');
+    rg.addColorStop(0, 'rgba(196,208,226,0.11)');
+    rg.addColorStop(1, 'rgba(196,208,226,0)');
     g.fillStyle = rg;
     g.fillRect(0, 0, size, size);
   }
@@ -90,9 +93,9 @@ export default function SmokeHero() {
   const sectionRef = useRef<HTMLElement>(null);
   const leftRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
-  const seamRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cueRef = useRef<HTMLDivElement>(null);
+  const veilRef = useRef<HTMLDivElement>(null);
   const openRef = useRef(0);
 
   // Scroll → doors open; the room hero underneath is held in place until they have.
@@ -107,12 +110,22 @@ export default function SmokeHero() {
       const h = window.innerHeight;
       const total = r.height - h;
       const raw = total > 0 ? clamp(-r.top / total) : 0;
-      const o = easeInOut(clamp(raw / 0.85));
+      const o = easeInOut(clamp((raw - 0.07) / 0.8));
+      // the words leave first, so the doors never cut through letters
+      section.style.setProperty('--words', clamp(raw / 0.06).toFixed(3));
       openRef.current = o;
-      if (leftRef.current) leftRef.current.style.transform = `translate3d(${-o * 100}%,0,0)`;
-      if (rightRef.current) rightRef.current.style.transform = `translate3d(${o * 100}%,0,0)`;
-      if (seamRef.current) seamRef.current.style.opacity = String(Math.min(o * 6, (1 - o) * 4));
+      section.style.setProperty('--open', o.toFixed(4));
+      const edge = Math.min(1, o * 10);
+      if (leftRef.current) {
+        leftRef.current.style.transform = `translate3d(${-o * 100}%,0,0)`;
+        leftRef.current.style.boxShadow = edge ? `24px 0 48px rgba(0,0,0,${0.55 * edge})` : '';
+      }
+      if (rightRef.current) {
+        rightRef.current.style.transform = `translate3d(${o * 100}%,0,0)`;
+        rightRef.current.style.boxShadow = edge ? `-24px 0 48px rgba(0,0,0,${0.55 * edge})` : '';
+      }
       if (cueRef.current) cueRef.current.style.opacity = String(1 - clamp(raw * 8));
+      if (veilRef.current) veilRef.current.style.opacity = String(1 - clamp(o * 1.4));
       if (canvasRef.current) canvasRef.current.style.opacity = String(1 - clamp(o * 2.2));
       section.style.pointerEvents = o > 0.98 ? 'none' : '';
       // keep the hero clean: no site header until the doors are mostly open
@@ -167,38 +180,39 @@ export default function SmokeHero() {
     };
     size();
     const parts: P[] = [];
-    const MAX = 140;
+    const MAX = 160;
     const spawn = (x: number, y: number, vx: number, vy: number, big = 1, alpha = 0.4) => {
       if (parts.length >= MAX) parts.shift();
       parts.push({
         x, y, vx, vy,
-        r: (34 + Math.random() * 30) * big,
-        gr: 0.4 + Math.random() * 0.4,
+        r: (30 + Math.random() * 26) * big,
+        gr: 0.3 + Math.random() * 0.35,
         rot: Math.random() * Math.PI * 2,
         vr: (Math.random() - 0.5) * 0.01,
         t: 0,
-        life: 150 + Math.random() * 110,
+        life: 140 + Math.random() * 100,
         a: alpha * (0.75 + Math.random() * 0.5),
       });
     };
 
-    let last: { x: number; y: number } | null = null;
+    // where the pointer is: smoke keeps rising from there, even while it rests
+    const src = { x: 0, y: 0, vx: 0, vy: 0, on: false };
     const onMove = (e: PointerEvent) => {
-      if (openRef.current > 0.6) return;
       const rect = canvas.getBoundingClientRect();
       const x = (e.clientX - rect.left) * SCALE;
       const y = (e.clientY - rect.top) * SCALE;
-      if (y < 0 || y > H) return;
-      if (!last) last = { x, y };
-      const dx = x - last.x;
-      const dy = y - last.y;
-      const steps = Math.min(6, Math.floor(Math.hypot(dx, dy) / 9));
-      for (let i = 1; i <= steps; i++) {
-        spawn(last.x + (dx * i) / steps, last.y + (dy * i) / steps, dx * 0.04 + (Math.random() - 0.5) * 0.4, dy * 0.04 - 0.15, 1, 0.24);
+      const inside = x >= 0 && x <= W && y >= 0 && y <= H;
+      if (src.on && inside) {
+        src.vx = src.vx * 0.6 + (x - src.x) * 0.4;
+        src.vy = src.vy * 0.6 + (y - src.y) * 0.4;
       }
-      if (steps) last = { x, y };
+      src.x = x;
+      src.y = y;
+      src.on = inside;
     };
+    const onLeave = () => (src.on = false);
     window.addEventListener('pointermove', onMove, { passive: true });
+    document.addEventListener('pointerleave', onLeave);
 
     let visible = true;
     const io = new IntersectionObserver(([en]) => (visible = en.isIntersecting));
@@ -213,10 +227,23 @@ export default function SmokeHero() {
       if (!visible || document.hidden || openRef.current > 0.95) return;
       tick++;
       // ambient haze rolling in from the lower left and right edges
-      if (tick % 20 === 0) {
+      if (tick % 36 === 0) {
         const side = Math.random() < 0.5;
-        spawn(side ? -20 : W + 20, H * (0.55 + Math.random() * 0.4), side ? 0.45 + Math.random() * 0.35 : -0.45 - Math.random() * 0.35, -0.1, 1.5, 0.12);
+        spawn(side ? -20 : W + 20, H * (0.6 + Math.random() * 0.35), side ? 0.4 + Math.random() * 0.3 : -0.4 - Math.random() * 0.3, -0.1, 1.4, 0.08);
       }
+      // a steady curl of smoke from the pointer
+      if (src.on && openRef.current < 0.5 && tick % 4 === 0) {
+        spawn(
+          src.x + (Math.random() - 0.5) * 12,
+          src.y + (Math.random() - 0.5) * 8,
+          src.vx * 0.1 + (Math.random() - 0.5) * 0.4,
+          src.vy * 0.1 - 0.6 - Math.random() * 0.45,
+          0.55,
+          0.13,
+        );
+      }
+      src.vx *= 0.9;
+      src.vy *= 0.9;
       ctx.clearRect(0, 0, W, H);
       for (let i = parts.length - 1; i >= 0; i--) {
         const p = parts[i];
@@ -225,7 +252,7 @@ export default function SmokeHero() {
           parts.splice(i, 1);
           continue;
         }
-        p.x += p.vx;
+        p.x += p.vx + Math.sin((p.t + p.rot * 40) * 0.035) * 0.18;
         p.y += p.vy;
         p.vx *= 0.985;
         p.vy = p.vy * 0.985 - 0.006;
@@ -245,6 +272,7 @@ export default function SmokeHero() {
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerleave', onLeave);
       io.disconnect();
       ro.disconnect();
     };
@@ -257,22 +285,20 @@ export default function SmokeHero() {
       className="relative z-10 -mt-[113px] h-[200vh] motion-reduce:-mt-[76px] motion-reduce:h-screen"
     >
       <div className="sticky top-0 h-screen min-h-[560px] overflow-hidden">
-        <div ref={leftRef} className="absolute inset-y-0 left-0 w-1/2 overflow-hidden will-change-transform">
+        {/* dark behind the doors: the gap opens on night, then the room fades up */}
+        <div ref={veilRef} aria-hidden="true" className="pointer-events-none absolute inset-0 bg-ink" />
+        <div ref={leftRef} className="absolute inset-y-0 left-0 z-[1] w-1/2 overflow-hidden will-change-transform">
           <div className="absolute inset-y-0 left-0 w-[200%]">
             <Face />
           </div>
         </div>
-        <div ref={rightRef} aria-hidden="true" className="absolute inset-y-0 right-0 w-1/2 overflow-hidden will-change-transform">
+        <div ref={rightRef} aria-hidden="true" className="absolute inset-y-0 right-0 z-[1] w-1/2 overflow-hidden will-change-transform">
           <div className="absolute inset-y-0 right-0 w-[200%]">
             <Face copy />
           </div>
         </div>
 
-        <div
-          ref={seamRef}
-          className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-[linear-gradient(transparent,#38BDF8,transparent)] opacity-0 shadow-[0_0_28px_6px_rgba(56,189,248,0.45)]"
-        />
-        <canvas ref={canvasRef} aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full" />
+        <canvas ref={canvasRef} aria-hidden="true" className="pointer-events-none absolute inset-0 z-[2] h-full w-full" />
 
         <div
           ref={cueRef}
