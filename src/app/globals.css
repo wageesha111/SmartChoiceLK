@@ -2643,11 +2643,6 @@ h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0
 }
 @keyframes sc-lit { 0% { background-position: 100% 0; } 55%, 100% { background-position: 0% 0; } }
 
-/* Hide the site header while the home-page intro plays */
-.sc-announce, .sc-header { transition: opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1); }
-html[data-intro="on"] .sc-announce { border-color: transparent; }
-html[data-intro="on"] .sc-announce > * { opacity: 0; }
-html[data-intro="on"] .sc-header { opacity: 0; transform: translateY(-120%); pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .sc-lit { animation: none; } }
 
 /* Category card brand chips */
@@ -2718,3 +2713,12 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
+
+/* ── Opening hero (SmokeHero) ── */
+@keyframes sc-hero-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.sc-hero-in { animation: sc-hero-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes sc-hero-photo { from { transform: scale(1.08); } to { transform: scale(1); } }
+.sc-hero-photo { animation: sc-hero-photo 2.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes sc-hero-cue { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
+.sc-hero-cue { animation: sc-hero-cue 1.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .sc-hero-in, .sc-hero-photo, .sc-hero-cue { animation: none; } }
