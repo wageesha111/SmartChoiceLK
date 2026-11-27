@@ -2715,6 +2715,11 @@ html {
 }
 
 /* ── Opening hero (SmokeHero) ── */
+/* The header and its announcement bar stay hidden while the hero is on screen */
+.sc-announce, .sc-header { transition: opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1); }
+html[data-intro="on"] .sc-announce { border-color: transparent; background: transparent; pointer-events: none; }
+html[data-intro="on"] .sc-announce > * { opacity: 0; }
+html[data-intro="on"] .sc-header { opacity: 0; transform: translateY(-120%); pointer-events: none; }
 @keyframes sc-hero-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 .sc-hero-in { animation: sc-hero-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
 @keyframes sc-hero-photo { from { transform: scale(1.08); } to { transform: scale(1); } }

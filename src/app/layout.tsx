@@ -60,6 +60,13 @@ export default function RootLayout({
     <html lang="en" className={fraunces.variable} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
+        {/* Home page hero: hide the header from the first paint so it doesn't flash in and slide away */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(location.pathname==='/'&&window.scrollY<window.innerHeight*0.6&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.dataset.intro='on'}catch(e){}",
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

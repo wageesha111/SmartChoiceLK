@@ -1,10 +1,6 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
-import { WhatsAppIcon } from '@/components/FloatingActions';
-import { whatsappLink } from '@/lib/site';
 
 /**
  * Opening hero: a night photo of a living room, soft smoke that follows the pointer, and the
@@ -21,7 +17,6 @@ const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2,
 
 function Face({ copy }: { copy?: boolean }) {
   const Title = copy ? 'p' : 'h1';
-  const tab = copy ? -1 : undefined;
   return (
     <>
       <picture>
@@ -38,7 +33,7 @@ function Face({ copy }: { copy?: boolean }) {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_55%,rgba(5,11,26,0.25),rgba(5,11,26,0.82)_70%)]" />
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(5,11,26,0.75),transparent_28%,transparent_62%,rgba(5,11,26,0.9))]" />
 
-      <div className="relative flex h-full flex-col items-center justify-center px-6 pt-16 text-center text-white">
+      <div className="relative flex h-full flex-col items-center justify-center px-6 text-center text-white">
         <p className="sc-hero-in text-[11px] font-semibold uppercase tracking-[0.42em] text-white/65 sm:text-xs">
           Smart Choice LK · Raddoluwa, Seeduwa
         </p>
@@ -57,27 +52,6 @@ function Face({ copy }: { copy?: boolean }) {
           Authorized Abans dealer. Genuine TVs, air conditioners, fridges and washing machines with the
           full brand warranty, ready to collect from our shop.
         </p>
-        <div
-          className="sc-hero-in mt-8 flex w-full max-w-xs flex-col gap-3 sm:w-auto sm:max-w-none sm:flex-row"
-          style={{ animationDelay: '360ms' }}
-        >
-          <Link
-            href="/products"
-            tabIndex={tab}
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-white px-7 text-sm font-bold uppercase tracking-[0.08em] text-ink transition hover:-translate-y-0.5 hover:bg-electric hover:text-white active:scale-[0.98]"
-          >
-            Browse products <ArrowRight className="h-4 w-4" />
-          </Link>
-          <a
-            href={whatsappLink()}
-            target="_blank"
-            rel="noopener noreferrer"
-            tabIndex={tab}
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-white/30 bg-white/10 px-7 text-sm font-bold uppercase tracking-[0.08em] text-white backdrop-blur-md transition hover:-translate-y-0.5 hover:bg-white/20 active:scale-[0.98]"
-          >
-            <WhatsAppIcon className="h-4 w-4" /> WhatsApp us
-          </a>
-        </div>
       </div>
     </>
   );
@@ -141,6 +115,11 @@ export default function SmokeHero() {
       if (cueRef.current) cueRef.current.style.opacity = String(1 - clamp(raw * 8));
       if (canvasRef.current) canvasRef.current.style.opacity = String(1 - clamp(o * 2.2));
       section.style.pointerEvents = o > 0.98 ? 'none' : '';
+      // keep the hero clean: no site header until the doors are mostly open
+      const root = document.documentElement;
+      const heroOn = o < 0.6 && r.bottom > 0;
+      if (heroOn && root.dataset.intro !== 'on') root.dataset.intro = 'on';
+      else if (!heroOn && root.dataset.intro === 'on') delete root.dataset.intro;
       const hero = section.nextElementSibling as HTMLElement | null;
       if (hero) {
         if (raw > 0 && raw < 1) {
@@ -162,6 +141,7 @@ export default function SmokeHero() {
       cancelAnimationFrame(raf);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
+      delete document.documentElement.dataset.intro;
       const hero = section.nextElementSibling as HTMLElement | null;
       if (hero) hero.style.transform = '';
     };
@@ -274,7 +254,7 @@ export default function SmokeHero() {
     <section
       ref={sectionRef}
       aria-label="Welcome to Smart Choice LK"
-      className="relative z-10 -mt-[76px] h-[200vh] motion-reduce:h-screen"
+      className="relative z-10 -mt-[113px] h-[200vh] motion-reduce:-mt-[76px] motion-reduce:h-screen"
     >
       <div className="sticky top-0 h-screen min-h-[560px] overflow-hidden">
         <div ref={leftRef} className="absolute inset-y-0 left-0 w-1/2 overflow-hidden will-change-transform">
