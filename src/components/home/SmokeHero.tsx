@@ -38,9 +38,9 @@ function Face({ copy }: { copy?: boolean }) {
         <picture>
           <source media="(max-width: 767px)" srcSet={PHOTO_SM} />
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={PHOTO} alt="" className="sc-hero-photo absolute inset-0 h-full w-full object-cover [filter:brightness(1.9)_contrast(1.08)_saturate(1.2)_sepia(0.38)]" />
+          <img src={PHOTO} alt="" className="sc-hero-photo absolute inset-0 h-full w-full object-cover [filter:brightness(2.4)_contrast(1.1)_saturate(1.25)_sepia(0.42)]" />
         </picture>
-        <div className="absolute inset-0 bg-[rgba(255,150,70,0.22)] mix-blend-overlay" />
+        <div className="absolute inset-0 bg-[rgba(255,150,70,0.32)] mix-blend-overlay" />
       </div>
 
       <div

@@ -2730,8 +2730,8 @@ html[data-intro="on"] .sc-header { opacity: 0; transform: translateY(-120%); poi
 /* Warm light under the cursor: a soft round window onto the lit copy of the photo */
 .sc-warm {
   opacity: var(--lo, 0);
-  --sc-warm-mask: radial-gradient(circle 300px at var(--lx, 50%) var(--ly, 45%), #000 0%, rgba(0,0,0,.75) 30%, rgba(0,0,0,.3) 62%, transparent 100%);
+  --sc-warm-mask: radial-gradient(circle 360px at var(--lx, 50%) var(--ly, 45%), #000 0%, rgba(0,0,0,.85) 35%, rgba(0,0,0,.4) 66%, transparent 100%);
   -webkit-mask-image: var(--sc-warm-mask);
   mask-image: var(--sc-warm-mask);
 }
-@media (max-width: 767px) { .sc-warm { --sc-warm-mask: radial-gradient(circle 190px at var(--lx, 50%) var(--ly, 45%), #000 0%, rgba(0,0,0,.75) 30%, rgba(0,0,0,.3) 62%, transparent 100%); } }
+@media (max-width: 767px) { .sc-warm { --sc-warm-mask: radial-gradient(circle 230px at var(--lx, 50%) var(--ly, 45%), #000 0%, rgba(0,0,0,.85) 35%, rgba(0,0,0,.4) 66%, transparent 100%); } }
