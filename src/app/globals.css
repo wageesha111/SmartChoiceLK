@@ -2727,3 +2727,11 @@ html[data-intro="on"] .sc-header { opacity: 0; transform: translateY(-120%); poi
 @keyframes sc-hero-cue { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
 .sc-hero-cue { animation: sc-hero-cue 1.8s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .sc-hero-in, .sc-hero-photo, .sc-hero-cue { animation: none; } }
+/* Warm light under the cursor: a soft round window onto the lit copy of the photo */
+.sc-warm {
+  opacity: var(--lo, 0);
+  --sc-warm-mask: radial-gradient(circle 300px at var(--lx, 50%) var(--ly, 45%), #000 0%, rgba(0,0,0,.75) 30%, rgba(0,0,0,.3) 62%, transparent 100%);
+  -webkit-mask-image: var(--sc-warm-mask);
+  mask-image: var(--sc-warm-mask);
+}
+@media (max-width: 767px) { .sc-warm { --sc-warm-mask: radial-gradient(circle 190px at var(--lx, 50%) var(--ly, 45%), #000 0%, rgba(0,0,0,.75) 30%, rgba(0,0,0,.3) 62%, transparent 100%); } }
