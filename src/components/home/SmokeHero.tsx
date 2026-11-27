@@ -207,7 +207,7 @@ export default function SmokeHero() {
       const dy = y - last.y;
       const steps = Math.min(6, Math.floor(Math.hypot(dx, dy) / 9));
       for (let i = 1; i <= steps; i++) {
-        spawn(last.x + (dx * i) / steps, last.y + (dy * i) / steps, dx * 0.04 + (Math.random() - 0.5) * 0.4, dy * 0.04 - 0.15, 1, 0.17);
+        spawn(last.x + (dx * i) / steps, last.y + (dy * i) / steps, dx * 0.04 + (Math.random() - 0.5) * 0.4, dy * 0.04 - 0.15, 1, 0.1);
       }
       if (steps) last = { x, y };
     };
@@ -228,7 +228,7 @@ export default function SmokeHero() {
       // ambient haze rolling in from the lower left and right edges
       if (tick % 36 === 0) {
         const side = Math.random() < 0.5;
-        spawn(side ? -20 : W + 20, H * (0.6 + Math.random() * 0.35), side ? 0.4 + Math.random() * 0.3 : -0.4 - Math.random() * 0.3, -0.1, 1.4, 0.08);
+        spawn(side ? -20 : W + 20, H * (0.6 + Math.random() * 0.35), side ? 0.4 + Math.random() * 0.3 : -0.4 - Math.random() * 0.3, -0.1, 1.4, 0.05);
       }
       ctx.clearRect(0, 0, W, H);
       for (let i = parts.length - 1; i >= 0; i--) {
